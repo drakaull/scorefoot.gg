@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScoreFoot.Sync\ScoreFoot.Sync.csproj" />
+    <ProjectReference Include="..\ScoreFoot.Api\ScoreFoot.Api.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3" />

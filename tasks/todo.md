@@ -2,7 +2,7 @@
 
 - [x] T1. Approve dependencies ✋ (2026-11-02)
 - [x] T2. Scaffold `ScoreFoot.Api` + `/health` + Compose service
-- [ ] T3. Search query (tests first)
+- [x] T3. Search query (tests first)
 - [ ] T4. `GET /search` endpoint
 - [ ] T5. `GET /media/{**path}` (tests first)
 - [ ] T6. Scaffold `web/`

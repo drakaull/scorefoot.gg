@@ -22,7 +22,7 @@ First visible version of ScoreFoot.gg: the home page with the big search bar (dp
 - `q` is trimmed; 2 to 50 characters, otherwise `400` with a short error message.
 - Normalized with `SearchText.Normalize` (same as stored names), so accents and case do not matter.
 - Players: match on `NameSearch` (name + first + last name). Clubs: match on `NameSearch` or `Code` (so "psg" finds Paris Saint Germain).
-- Ranking: names starting with the query first, then any word starting with it, then trigram similarity (`pg_trgm`, threshold 0.3); ties broken by minutes played in the most recent season (stars before reserves).
+- Ranking: names starting with the query first, then any word starting with it, then the rest: substring or `pg_trgm` word similarity (`<%`, default threshold 0.6, so typos like "mbape" still match; whole-name similarity is too low on long names). Ties: closest word similarity, then minutes played in the player's latest season (stars before reserves).
 - Limits: 6 players, 4 clubs.
 - Response:
 ```json
