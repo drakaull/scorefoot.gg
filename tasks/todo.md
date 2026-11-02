@@ -2,7 +2,7 @@
 
 - [x] T1. "Forward" → "Attacker" at import, then reimport
 - [x] T2. Search leaves out players who never played
-- [ ] T3. Player profile and seasons (tests first)
+- [x] T3. Player profile and seasons (tests first)
 - [ ] T4. Last 5 matches (tests first)
 - [ ] T5. Radar percentiles (tests first)
 - [ ] T6. Detailed stats and `GET /players/{id}` ✋
