@@ -11,5 +11,5 @@
 - [x] T9. `run` command and error handling
 - [x] T10. Image download
 - [x] T11. `status` command
-- [ ] T12. `sync` in Docker Compose + first real run ✋
+- [x] T12. `sync` in Docker Compose + first real run ✋
 - [x] T13. Acceptance (before 2026-12-02) ✋ — passed 2026-11-02 (1,291 requests, 0 failed tasks)
