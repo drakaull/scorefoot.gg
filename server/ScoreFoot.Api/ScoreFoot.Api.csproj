@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\ScoreFoot.Data\ScoreFoot.Data.csproj" />
+  </ItemGroup>
+</Project>

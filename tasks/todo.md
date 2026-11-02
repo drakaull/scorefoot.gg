@@ -1,7 +1,7 @@
 # Todo — Spec 02 Site shell and search
 
 - [x] T1. Approve dependencies ✋ (2026-11-02)
-- [ ] T2. Scaffold `ScoreFoot.Api` + `/health` + Compose service
+- [x] T2. Scaffold `ScoreFoot.Api` + `/health` + Compose service
 - [ ] T3. Search query (tests first)
 - [ ] T4. `GET /search` endpoint
 - [ ] T5. `GET /media/{**path}` (tests first)
