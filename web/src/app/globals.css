@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/* Tokens from docs/DESIGN_SYSTEM.md. Never add a colour, font or size that is not in that file. */
+@theme {
+  --color-*: initial;
+  --color-bg: #0b100d;
+  --color-surface: #121915;
+  --color-raised: #19221d;
+  --color-border: #232e27;
+  --color-text: #e8edf3;
+  --color-muted: #8c9890;
+  --color-accent: #3ddc84;
+  --color-accent-hover: #5be79a;
+  --color-gold: #f5c451;
+  --color-error: #f2555a;
+  --color-ink: #0b100d; /* text on accent, gold or rating backgrounds */
+
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+
+  --text-display: 56px;
+  --text-display-mobile: 36px;
+  --text-h1: 32px;
+  --text-h1-mobile: 26px;
+  --text-h2: 22px;
+  --text-h3: 17px;
+  --text-body: 15px;
+  --text-stat: 36px;
+  --text-caption: 12px;
+
+  --radius-sm: 6px;
+  --radius-button: 8px;
+  --radius-card: 10px;
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 640px;
+  --breakpoint-lg: 1024px;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-text);
+  color-scheme: dark;
+}
+
+body {
+  font-size: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+}
