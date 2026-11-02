@@ -77,6 +77,37 @@ public class PlayerPageTests
             page.History[0]);
     }
 
+    [Fact]
+    public async Task Form_is_the_last_5_matches_played_in_the_season()
+    {
+        using var db = Seed();
+        var start = new DateTimeOffset(2026, 3, 1, 20, 0, 0, TimeSpan.Zero);
+        // Fixtures 1..6 in 2025, one per week; fixture 7 is the latest but he stayed on the bench; fixture 8 is in 2024.
+        for (var i = 1; i <= 8; i++)
+        {
+            var home = i % 2 == 1; // odd fixtures at home for PSG
+            db.Fixtures.Add(new Fixture
+            {
+                Id = i, LeagueId = 61, Season = i == 8 ? 2024 : 2025, Round = "R", Status = "FT",
+                KickoffUtc = i == 8 ? start.AddYears(-1) : start.AddDays(7 * i),
+                HomeTeamId = home ? 85 : 79, AwayTeamId = home ? 79 : 85, HomeGoals = 2, AwayGoals = 1,
+            });
+            db.FixturePlayerStats.Add(new FixturePlayerStat
+            {
+                FixtureId = i, PlayerId = 1, TeamId = 85, Minutes = i == 7 ? 0 : 60 + i,
+                Rating = i == 6 ? null : 7.1m, Goals = i == 6 ? 1 : null, Assists = null,
+            });
+        }
+        db.Teams.Find(79)!.Code = "LIL";
+        await db.SaveChangesAsync(Ct);
+
+        var form = (await PlayerPage.LoadAsync(db, 1, null, Ct))!.Form;
+
+        Assert.Equal([6, 5, 4, 3, 2], form.Select(m => m.FixtureId));
+        Assert.Equal(new FormMatch(6, start.AddDays(42), new Opponent(79, "Lille", "LIL", null), false, 1, 2, 66, null, 1, 0), form[0]);
+        Assert.Equal((true, 2, 1, 0), (form[1].Home, form[1].GoalsFor, form[1].GoalsAgainst, form[1].Goals));
+    }
+
     [Theory]
     [InlineData(999, null)]  // unknown player
     [InlineData(2, null)]    // never played
