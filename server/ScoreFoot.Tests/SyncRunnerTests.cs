@@ -119,4 +119,28 @@ public class SyncRunnerTests
         Assert.Equal("Achraf Hakimi", db.Players.Single(p => p.Id == 9).Name);
         Assert.Equal((requests, tasks), (api.Requests.Count, db.SyncTasks.Count()));
     }
+
+    [Fact]
+    public async Task Season_lines_copied_onto_a_later_club_are_removed()
+    {
+        using var db = TestDb.CreateEmpty();
+        db.Leagues.Add(new League { Id = 61, Name = "Ligue 1" });
+        db.Teams.AddRange(
+            new Team { Id = 1, Name = "Reims", NameSearch = "reims" },
+            new Team { Id = 2, Name = "Monaco", NameSearch = "monaco" });
+        db.Players.AddRange(
+            new Player { Id = 10, Name = "Folarin Balogun", NameSearch = "folarin balogun" },
+            new Player { Id = 11, Name = "No Match", NameSearch = "no match" });
+        db.Fixtures.Add(new Fixture { Id = 100, LeagueId = 61, Season = 2022, Round = "1", Status = "FT", HomeTeamId = 1, AwayTeamId = 2 });
+        db.FixturePlayerStats.Add(new FixturePlayerStat { FixtureId = 100, PlayerId = 10, TeamId = 1, Minutes = 90 });
+        db.PlayerSeasonStats.AddRange(
+            new PlayerSeasonStat { PlayerId = 10, TeamId = 1, LeagueId = 61, Season = 2022, Minutes = 3013, Goals = 21 }, // real club
+            new PlayerSeasonStat { PlayerId = 10, TeamId = 2, LeagueId = 61, Season = 2022, Minutes = 3010, Goals = 21 }, // copy
+            new PlayerSeasonStat { PlayerId = 11, TeamId = 2, LeagueId = 61, Season = 2022, Minutes = 500 });              // no match line: kept
+        await db.SaveChangesAsync(Ct);
+
+        Assert.Equal(1, await Build.Runner(db, new FakeApi(FakeLigue1), Build.Options()).PruneTransferCopiesAsync(Ct));
+
+        Assert.Equal([(10, 1), (11, 2)], db.PlayerSeasonStats.OrderBy(s => s.PlayerId).Select(s => new { s.PlayerId, s.TeamId }).AsEnumerable().Select(s => (s.PlayerId, s.TeamId)));
+    }
 }

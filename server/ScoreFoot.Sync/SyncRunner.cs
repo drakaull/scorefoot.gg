@@ -31,6 +31,7 @@ public sealed class SyncRunner(ScoreFootDbContext db, ApiFootballClient api, Syn
             if (TaskPlanner.NextId(pending.Select(p => (p.Id, p.LeagueId, p.Season)), options) is not { } nextId)
             {
                 log.LogInformation("All tasks processed: {Done} done, {Failed} failed in this run", done, failed);
+                await PruneTransferCopiesAsync(ct);
                 return RunResult.Completed;
             }
 
@@ -118,7 +119,24 @@ public sealed class SyncRunner(ScoreFootDbContext db, ApiFootballClient api, Syn
             await db.SaveChangesAsync(ct);
         }
         log.LogInformation("Re-imported {Count} saved answers", saved.Count);
+        await PruneTransferCopiesAsync(ct);
         return saved.Count;
+    }
+
+    /// <summary>
+    /// The players endpoint copies a season line onto clubs the player joined later (Balogun 2022: Reims and Monaco).
+    /// A line is a copy when the player has match lines in that league-season for other clubs but none for this one.
+    /// Lines without any match line are kept: nothing proves them wrong.
+    /// </summary>
+    public async Task<int> PruneTransferCopiesAsync(CancellationToken ct = default)
+    {
+        var deleted = await db.PlayerSeasonStats
+            .Where(s => s.Minutes > 0
+                && !db.FixturePlayerStats.Any(f => f.PlayerId == s.PlayerId && f.TeamId == s.TeamId && f.Fixture.LeagueId == s.LeagueId && f.Fixture.Season == s.Season)
+                && db.FixturePlayerStats.Any(f => f.PlayerId == s.PlayerId && f.TeamId != s.TeamId && f.Fixture.LeagueId == s.LeagueId && f.Fixture.Season == s.Season))
+            .ExecuteDeleteAsync(ct);
+        log.LogInformation("Removed {Count} season lines copied onto a later club", deleted);
+        return deleted;
     }
 
     private async Task MarkFailedAsync(SyncTask task, string error, CancellationToken ct)
