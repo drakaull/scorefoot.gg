@@ -9,6 +9,7 @@ The page a search result opens: one dense, readable page per player with the sea
 - `ScoreFoot.Api`: `GET /players/{id}`.
 - `web`: page `/{locale}/players/{id}-{slug}` with a season switch.
 - `ScoreFoot.Sync`: position labels normalized at import ("Forward" → "Attacker"), then `reimport` (no API call).
+- `GET /search` (spec 02): players who never played a minute are left out.
 
 ## Out of Scope
 - Comparator and its "Compare" button (comparator spec).
@@ -22,10 +23,16 @@ The page a search result opens: one dense, readable page per player with the sea
 - `Importer.FillStatLine` maps "Forward" to "Attacker", so season lines only hold Goalkeeper, Defender, Midfielder, Attacker. Match lines are unchanged.
 - After the change, `docker compose run --rm sync reimport` rewrites the existing rows. Test: a season line with "Forward" is stored as "Attacker".
 
+## Data rules
+- **Played line:** a season line with minutes > 0. The API also lists squad members who never played (6,560 empty lines, e.g. Mbappé at PSG in 2024-25 after his move). Empty lines are ignored everywhere: season tabs, club chips, summary, history, radar.
+- **Players who never played** (2,701, e.g. Tom Heaton, id 2931): no page (404) and left out of search results. The PRD covers players who played.
+- **Missing counts:** the API sends `null` instead of 0 for counts (goals is null in 92 % of played match lines). On a played line or match, a null count (goals, assists, shots, tackles, blocks, cards…) counts as 0.
+- **Missing rating or percentage:** a null rating or pass accuracy is a real gap. It shows "–", is left out of weighted averages and of that radar axis's ranking.
+
 ## API
 ### `GET /players/{id}?season={year}`
-- `id` unknown, or the player has no season line → `404`.
-- `season` missing → the latest season the player has a line in. `season` given but not one of the player's seasons → `404`.
+- `id` unknown, or the player has no played line → `404`.
+- `season` missing → the latest season the player has a played line in. `season` given but not one of the player's seasons → `404`.
 - A season can hold several lines (mid-season transfer, or two leagues): the season figures add them up.
 
 Response (example values):
@@ -57,13 +64,13 @@ Response (example values):
 - `summary.rating`: season ratings weighted by minutes. `previous`: same figures for the season before, `null` if the player has none (used for deltas).
 - `form`: up to 5 matches of the chosen season where the player played (minutes > 0), most recent first. `goalsFor` / `goalsAgainst` from the player's team side.
 - `history`: every season line of the 4 seasons, newest first (two clubs in one season → two rows).
-- Null values from the API stay `null` (shown as "–"), never `0`.
+- Missing values follow the Data rules: counts are 0, a missing rating or percentage is `null` (shown as "–").
 
 ### Radar
 - Compared group: same season, same position, all 5 leagues, players with at least 900 minutes in that season (all their lines added up). The 900 is a constant in `ScoreFoot.Api`, not hard-coded in SQL.
 - Values per 90 minutes, except percentages and rating. Percentile = `round(100 × percent_rank)` inside the group (ties share a value); for "goals conceded" lower is better.
 - Below 900 minutes: `eligible: false`, no axes; the page shows "Not enough minutes for a fair comparison (900 min needed)".
-- A player with a null value on an axis gets `percentile: null` on that axis and is left out of that axis's ranking.
+- A player with a null rating or percentage on an axis gets `percentile: null` on that axis and is left out of that axis's ranking.
 
 | Position   | Axes |
 |------------|------|
@@ -89,14 +96,15 @@ Groups and rows (total and per 90; percentages have no per 90):
 - Non-numeric id, unknown player, unknown or invalid season → the localized 404 page.
 - Page title: "Kylian Mbappé · ScoreFoot.gg"; description with club and season.
 
-### Layout (mockup, player part)
+### Layout (player mockup approved 2026-11-02)
 1. **Header card:** photo 96px (64px on mobile, initials if missing), name (H1), chips: club(s) (link), position, nationality, age ("27 y/o", from the birth date and today), height when known. Below: season tabs "2025-26 · 2024-25 · …" (only seasons the player has), active tab Text colour + Accent underline.
 2. **4 stat cards** (2 × 2 on mobile): Goals, Assists, Avg rating (rating colour, one decimal), Minutes (sub-line: appearances). Each with a Delta line vs the previous season ("+11 vs 24-25"); none if no previous season.
 3. **Two cards side by side** (stacked under 1024px):
-   - "Last 5 matches": per match, rating badge (Muted "–" chip if no rating), "vs RSO · W" (or "at RSO" away), score and minutes as sub-line; most recent on the left.
-   - "Percentiles vs attackers" (position plural, translated): SVG radar, hand-written, with "Goals 99" labels; or the not-enough-minutes message.
-4. **Detailed stats card:** table per group (Caption headers "Total" and "Per 90"), tabular figures.
-5. **Club history card:** table Season, Club (logo + name, league as sub-line), Apps, Min, Goals, Assists, Rating badge.
+   - "Last 5 matches": per match, rating badge (Muted "–" chip if no rating), "vs BIL" (or "at SEV" away), then "W 4-2" and minutes on two sub-lines; most recent on the left.
+   - "Percentiles vs attackers" (position plural, translated): SVG radar, hand-written, with "Goals 99" labels and a note "Against 348 attackers with 900+ minutes in 2025-26, top 5 leagues"; or the not-enough-minutes message.
+4. **Two cards side by side** (stacked under 1024px):
+   - Detailed stats: table per group (Caption headers "Total" and "Per 90"), tabular figures.
+   - Club history: table Season, Club (logo + name, league as sub-line, truncated with "…"), Apps, Min, Goals, Assists, Rating badge. Under 640px: no Season, Min and Assists columns; the season moves into the sub-line ("25-26 · La Liga").
 
 ### States
 - Loading: `loading.tsx` with grey card skeletons of the same sizes (no layout jump).
@@ -115,8 +123,11 @@ Groups and rows (total and per 90; percentages have no per 90):
 ## Acceptance criteria
 - [ ] `/en/players/278-kylian-mbappe` shows Mbappé's latest season; `?season=2022` shows 2022-23 with his club of that season.
 - [ ] `/en/players/278-x` redirects to `/en/players/278-kylian-mbappe`; `/en/players/999999999-x` and `?season=2019` show the 404 page.
-- [ ] A player transferred mid-season shows the added-up season and two rows in the club history.
-- [ ] A player under 900 minutes shows the not-enough-minutes message instead of the radar.
+- [ ] Mbappé's club history has no PSG 2024-25 row (empty line).
+- [ ] Antoine Semenyo (2025-26, Bournemouth then Manchester City) shows the added-up season and two rows in the club history.
+- [ ] Jadon Sancho in 2025-26 (891 minutes) shows the not-enough-minutes message instead of the radar.
+- [ ] Tom Heaton (never played) is not in search results and `/en/players/2931-tom-heaton` shows the 404 page.
+- [ ] Form shows 0 goals, not "–", for a match where the player did not score.
 - [ ] No season line says "Forward" after `reimport`.
 - [ ] The api answers in under 200 ms locally (20 players, latest and oldest season); the page loads in under 1 s.
 - [ ] `/en` and `/fr` show every label in the right language.
@@ -124,7 +135,7 @@ Groups and rows (total and per 90; percentages have no per 90):
 - [ ] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
 
 ## Tests
-- xUnit (test database): season adding-up across two clubs and weighted rating, latest season default, unknown id / season → 404 data, form order and minutes > 0 filter, percentile values on a small known group (including ties, nulls and the inverted goals-conceded axis), the 900-minute rule, "Forward" → "Attacker" at import.
+- xUnit (test database): empty lines ignored, never-played player → 404 and absent from search, null counts as 0 but null rating left out, season adding-up across two clubs and weighted rating, latest season default, unknown id / season → 404 data, form order and minutes > 0 filter, percentile values on a small known group (including ties, nulls and the inverted goals-conceded axis), the 900-minute rule, "Forward" → "Attacker" at import.
 - Vitest: season label (2024 → "2024-25"), age from birth date, delta formatting, rating colour bands, radar point coordinates.
 - Playwright (Chrome + Firefox): search → Enter → player page shows the name and 4 cards; season tab switches the season in the URL and the cards; wrong slug redirects; French labels on `/fr`.
 
@@ -136,3 +147,6 @@ Groups and rows (total and per 90; percentages have no per 90):
 5. "Forward" → "Attacker" fixed at import in this branch, then `reimport`.
 6. URL: `/{locale}/players/{id}-{slug}?season=YYYY`, latest season by default, wrong slug redirected.
 7. No new dependency.
+8. Lines with 0 minutes are ignored; players who never played have no page and are not in search.
+9. A missing count is 0 on a played line or match; a missing rating or percentage stays "–".
+10. Desktop: detailed stats and club history side by side (player mockup).
