@@ -19,5 +19,22 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # One-off job, not started by "docker compose up": docker compose run --rm sync run | status
+  sync:
+    build:
+      context: ./server
+      dockerfile: ScoreFoot.Sync/Dockerfile
+    profiles: ["tools"]
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      Sync__ImagesPath: /data/images
+    volumes:
+      - images:/data/images
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  images:
