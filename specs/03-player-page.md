@@ -60,10 +60,10 @@ Response (example values):
                 "goals": 31, "assists": 4, "rating": 7.62 }]
 }
 ```
-- `position`: position of the season line with the most minutes. `clubs`: the season's clubs, most minutes first.
+- `position`: position of the season line with the most minutes. `clubs`: the season's clubs, the one he played for last first (date of his last match for it), so a January move shows the new club first.
 - `summary.rating`: season ratings weighted by minutes. `previous`: same figures for the season before, `null` if the player has none (used for deltas).
 - `form`: up to 5 matches of the chosen season where the player played (minutes > 0), most recent first. `goalsFor` / `goalsAgainst` from the player's team side.
-- `history`: every season line of the 4 seasons, newest first (two clubs in one season → two rows).
+- `history`: every season line of the 4 seasons, newest season first; inside a season, same order as `clubs` (two clubs in one season → two rows).
 - Missing values follow the Data rules: counts are 0, a missing rating or percentage is `null` (shown as "–").
 
 ### Radar
@@ -108,6 +108,7 @@ Groups and rows (total and per 90; percentages have no per 90):
 
 ### States
 - Loading: no skeleton. A `loading.tsx` would make Next.js send "200 OK" before it knows the page is a 404 or a redirect; the api answers in under 100 ms, so the previous page simply stays until the new one is ready.
+- Navigation feedback instead: a season tab turns active at once and the cards below the header fade while the next season loads (`LinkPending` + `useLinkStatus`); after Enter in the search, the spinner stays in the bar until the player page is on screen.
 - Error (api unreachable): an error card "Stats are unavailable, try again" with a retry button.
 - Empty pieces: no rated match → badges show "–"; no form match in the season → "No match played this season".
 

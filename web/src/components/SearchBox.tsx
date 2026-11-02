@@ -3,7 +3,7 @@
 import { LoaderCircle, Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { type SearchResults, validQuery } from "@/lib/api";
 import { createSearch, fetchSearch, type SearchState } from "@/lib/search-client";
@@ -20,6 +20,8 @@ export function SearchBox() {
   const t = useTranslations("Search");
   const tPos = useTranslations("Position");
   const router = useRouter();
+  // True from Enter (or click) until the result page is on screen: the spinner keeps showing meanwhile.
+  const [navigating, startNavigation] = useTransition();
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
@@ -42,7 +44,7 @@ export function SearchBox() {
       pendingEnter.current = false;
       if (href) {
         setOpen(false);
-        router.push(href);
+        startNavigation(() => router.push(href));
       }
     });
     searchRef.current(input);
@@ -86,7 +88,7 @@ export function SearchBox() {
   const go = (item: Item | undefined) => {
     if (!item) return;
     setOpen(false);
-    router.push(item.href);
+    startNavigation(() => router.push(item.href));
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -154,7 +156,7 @@ export function SearchBox() {
   return (
     <div className="relative mx-auto mt-7 max-w-[680px] text-left">
       <div className="flex h-14 items-center gap-3 rounded-card border border-border bg-raised px-4 text-muted focus-within:outline-2 focus-within:outline-accent">
-        {state.status === "loading" ? (
+        {state.status === "loading" || navigating ? (
           <LoaderCircle aria-hidden="true" size={20} strokeWidth={1.75} className="shrink-0 animate-spin" />
         ) : (
           <Search aria-hidden="true" size={20} strokeWidth={1.75} className="shrink-0" />

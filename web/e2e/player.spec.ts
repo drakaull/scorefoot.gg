@@ -25,6 +25,37 @@ test("a season tab switches the season in the URL and the cards", async ({ page 
   await expect(page.getByRole("heading", { level: 1 }).locator("..").getByRole("link", { name: "Paris Saint Germain" })).toBeVisible();
 });
 
+test("a slow season tab shows the click at once and fades the cards", async ({ page }) => {
+  await page.goto("/en/players/278-kylian-mbappe");
+  // Hold the next page for a second so the in-between state can be checked.
+  await page.route(/season=2023/, async (route) => {
+    await new Promise((r) => setTimeout(r, 1000));
+    await route.continue();
+  });
+  const tab = page.getByRole("navigation", { name: "Seasons" }).getByRole("link", { name: "2023-24" });
+  await tab.click();
+
+  await expect(tab.locator("[data-link-pending]")).toBeAttached();
+  await expect(page.locator("[data-pending-dim]")).toHaveCSS("opacity", "0.5");
+  await expect(page).toHaveURL(/season=2023$/);
+  await expect(page.locator("[data-pending-dim]")).toHaveCSS("opacity", "1");
+});
+
+test("the search spinner stays on until the player page arrives", async ({ page }) => {
+  await page.goto("/en");
+  await page.route(/\/players\/278-kylian-mbappe/, async (route) => {
+    await new Promise((r) => setTimeout(r, 1000));
+    await route.continue();
+  });
+  const box = page.getByRole("combobox");
+  await box.fill("mbap");
+  await expect(page.getByRole("option").first()).toContainText("Kylian Mbappé");
+  await box.press("Enter");
+
+  await expect(page.locator(".animate-spin")).toBeVisible();
+  await expect(page).toHaveURL(/\/en\/players\/278-kylian-mbappe$/);
+});
+
 test("a wrong name in the URL redirects, keeping the season", async ({ page }) => {
   const res = await page.goto("/en/players/278-x?season=2022");
   expect(res?.request().redirectedFrom()?.url()).toContain("/en/players/278-x");

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Card } from "@/components/Card";
+import { LinkPending } from "@/components/LinkPending";
 import { Link } from "@/i18n/navigation";
 import { ageOn, seasonLabel, type Player } from "@/lib/player";
 import { entityPath, initials } from "@/lib/slug";
@@ -59,10 +60,13 @@ export function PlayerHeader({ player }: { player: Player }) {
             href={{ pathname: path, query: { season } }}
             aria-current={season === player.season ? "page" : undefined}
             className={`py-3 text-body font-semibold whitespace-nowrap tabular-nums ${
-              season === player.season ? "text-text shadow-[inset_0_-2px_0_var(--color-accent)]" : "text-muted hover:text-accent"
+              season === player.season
+                ? "text-text shadow-[inset_0_-2px_0_var(--color-accent)]"
+                : "text-muted hover:text-accent has-[[data-link-pending]]:text-text has-[[data-link-pending]]:shadow-[inset_0_-2px_0_var(--color-accent)]"
             }`}
           >
             {seasonLabel(season)}
+            <LinkPending />
           </Link>
         ))}
       </nav>

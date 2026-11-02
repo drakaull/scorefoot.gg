@@ -68,6 +68,7 @@ Ratings are shown as a badge: rating colour background, `#0B100D` text, one deci
 - **Podium:** top 3 of a leaderboard as 3 big cards, rank number in Gold (#1), Text (#2, #3).
 - **Tabs:** Muted text, active tab in Text colour with a 2px Accent underline.
 - **Rating badge:** see rating scale above, 6px radius, min width 36px.
+- **Navigation feedback:** a clicked tab turns active at once; the content it replaces fades to 50% opacity (after 100ms, 150ms transition) until the new content arrives. The search bar keeps its spinner until the opened page is on screen. No skeleton on pages that can be a 404 or a redirect.
 
 ## 07 Icons
 Lucide icons, outline style, 1.75px stroke, 16px or 20px. Exact package chosen in ARCHITECTURE.md.

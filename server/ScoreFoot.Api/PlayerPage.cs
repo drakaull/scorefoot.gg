@@ -35,6 +35,17 @@ public sealed record PlayerPage(
             .ToListAsync(ct);
         if (lines.Count == 0) return null;
 
+        // Within a season, the club he played for last comes first (a January move puts the new club on top).
+        var lastMatch = await db.FixturePlayerStats.AsNoTracking()
+            .Where(s => s.PlayerId == id && s.Minutes > 0)
+            .GroupBy(s => new { s.Fixture.Season, s.TeamId })
+            .Select(g => new { g.Key.Season, g.Key.TeamId, Last = g.Max(s => s.Fixture.KickoffUtc) })
+            .ToDictionaryAsync(x => (x.Season, x.TeamId), x => x.Last, ct);
+        lines = lines.OrderByDescending(l => l.Season)
+            .ThenByDescending(l => lastMatch.GetValueOrDefault((l.Season, l.TeamId), DateTimeOffset.MinValue))
+            .ThenByDescending(l => l.Minutes)
+            .ToList();
+
         var seasons = lines.Select(l => l.Season).Distinct().ToList();
         var chosen = season ?? seasons[0];
         var current = lines.Where(l => l.Season == chosen).ToList();
@@ -56,7 +67,7 @@ public sealed record PlayerPage(
                 s.Minutes ?? 0, s.Rating, s.Goals ?? 0, s.Assists ?? 0);
         }).ToList();
 
-        var position = current[0].Position;
+        var position = current.MaxBy(l => l.Minutes)!.Position;
         var totals = SeasonTotals.From(current);
         var radar = Api.Radar.Build(position, totals, await RadarGroupAsync(db, chosen, position, ct));
 

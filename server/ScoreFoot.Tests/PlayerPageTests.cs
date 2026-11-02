@@ -110,6 +110,27 @@ public class PlayerPageTests
         Assert.Equal((true, 2, 1, 0), (form[1].Home, form[1].GoalsFor, form[1].GoalsAgainst, form[1].Goals));
     }
 
+    [Fact]
+    public async Task Clubs_of_a_season_are_sorted_by_last_match_latest_first()
+    {
+        using var db = Seed();
+        // He played for PSG (900 min) then moved to Lille (300 min): Lille is his latest club.
+        var kickoff = new DateTimeOffset(2026, 1, 10, 20, 0, 0, TimeSpan.Zero);
+        db.Fixtures.AddRange(
+            new Fixture { Id = 1, LeagueId = 61, Season = 2025, Round = "R", Status = "FT", KickoffUtc = kickoff, HomeTeamId = 85, AwayTeamId = 79 },
+            new Fixture { Id = 2, LeagueId = 61, Season = 2025, Round = "R", Status = "FT", KickoffUtc = kickoff.AddDays(30), HomeTeamId = 79, AwayTeamId = 85 });
+        db.FixturePlayerStats.AddRange(
+            new FixturePlayerStat { FixtureId = 1, PlayerId = 1, TeamId = 85, Minutes = 90 },
+            new FixturePlayerStat { FixtureId = 2, PlayerId = 1, TeamId = 79, Minutes = 90 });
+        await db.SaveChangesAsync(Ct);
+
+        var page = (await PlayerPage.LoadAsync(db, 1, null, Ct))!;
+
+        Assert.Equal(["Lille", "Paris Saint Germain"], page.Clubs.Select(c => c.Name));
+        Assert.Equal(["Lille", "Paris Saint Germain"], page.History.Where(h => h.Season == 2025).Select(h => h.Club.Name));
+        Assert.Equal("Attacker", page.Position); // still from the line with the most minutes
+    }
+
     [Theory]
     [InlineData(999, null)]  // unknown player
     [InlineData(2, null)]    // never played

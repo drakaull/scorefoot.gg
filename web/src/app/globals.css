@@ -52,3 +52,12 @@ body {
   font-size: var(--text-body);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Navigation feedback: while a link inside [data-pending-scope] loads (see LinkPending.tsx),
+   the [data-pending-dim] part fades. The short delay avoids a flash on fast pages. */
+[data-pending-dim] {
+  transition: opacity 150ms ease 100ms;
+}
+[data-pending-scope]:has([data-link-pending]) [data-pending-dim] {
+  opacity: 0.5;
+}

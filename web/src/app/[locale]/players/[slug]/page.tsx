@@ -52,16 +52,19 @@ export default async function PlayerRoute({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-3 py-4 sm:gap-4 sm:py-6">
+    <div data-pending-scope className="flex flex-col gap-3 py-4 sm:gap-4 sm:py-6">
       <PlayerHeader player={player} />
-      <StatCards player={player} />
-      <div className="grid items-start gap-3 sm:gap-4 lg:grid-cols-2">
-        <FormCard form={player.form} />
-        <RadarCard player={player} />
-      </div>
-      <div className="grid items-start gap-3 sm:gap-4 lg:grid-cols-2">
-        <StatsCard stats={player.stats} />
-        <HistoryCard history={player.history} />
+      {/* Fades while a season tab loads (globals.css, LinkPending). */}
+      <div data-pending-dim className="flex flex-col gap-3 sm:gap-4">
+        <StatCards player={player} />
+        <div className="grid items-start gap-3 sm:gap-4 lg:grid-cols-2">
+          <FormCard form={player.form} />
+          <RadarCard player={player} />
+        </div>
+        <div className="grid items-start gap-3 sm:gap-4 lg:grid-cols-2">
+          <StatsCard stats={player.stats} />
+          <HistoryCard history={player.history} />
+        </div>
       </div>
     </div>
   );
