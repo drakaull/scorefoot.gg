@@ -26,15 +26,27 @@ public sealed class ImageDownloader(HttpClient http, ScoreFootDbContext db, Sync
             if (!File.Exists(file)) // a file left by an interrupted run is reused
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(options.MinImageDelayMs), clock, ct);
-                using var response = await http.GetAsync(url, ct);
-                if (!response.IsSuccessStatusCode)
+                byte[] bytes;
+                try
                 {
-                    log.LogWarning("Image {Url} returned HTTP {Status}; will retry on the next run", url, (int)response.StatusCode);
+                    using var response = await http.GetAsync(url, ct);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        log.LogWarning("Image {Url} returned HTTP {Status}; will retry on the next run", url, (int)response.StatusCode);
+                        failed++;
+                        return;
+                    }
+                    bytes = await response.Content.ReadAsByteArrayAsync(ct);
+                }
+                catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
+                {
+                    // One network hiccup must not stop the other thousands of downloads.
+                    log.LogWarning("Image {Url} failed ({Message}); will retry on the next run", url, ex.Message);
                     failed++;
                     return;
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-                await File.WriteAllBytesAsync(file, await response.Content.ReadAsByteArrayAsync(ct), ct);
+                await File.WriteAllBytesAsync(file, bytes, ct);
             }
             setPath(relative);
             if (++saved % 100 == 0)

@@ -57,4 +57,23 @@ public class ImageDownloaderTests : IDisposable
         db.ChangeTracker.Clear();
         Assert.Null(db.Teams.Single().LogoPath);
     }
+
+    [Fact]
+    public async Task Network_error_skips_only_that_image()
+    {
+        using var db = TestDb.CreateEmpty();
+        db.Teams.AddRange(
+            new Team { Id = 1, Name = "A", NameSearch = "a", LogoUrl = "https://cdn.test/football/teams/1.png" },
+            new Team { Id = 2, Name = "B", NameSearch = "b", LogoUrl = "https://cdn.test/football/teams/2.png" });
+        await db.SaveChangesAsync(Ct);
+        var cdn = new FakeApi(uri => uri.AbsolutePath.EndsWith("1.png")
+            ? throw new HttpRequestException("connection reset")
+            : new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent([1]) });
+
+        await Downloader(db, cdn).DownloadMissingAsync(Ct);
+
+        db.ChangeTracker.Clear();
+        Assert.Null(db.Teams.Single(t => t.Id == 1).LogoPath);
+        Assert.Equal("teams/2.png", db.Teams.Single(t => t.Id == 2).LogoPath);
+    }
 }
