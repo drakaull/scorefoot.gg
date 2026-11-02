@@ -93,7 +93,7 @@ Groups and rows (total and per 90; percentages have no per 90):
 ### Route
 - `/{locale}/players/{id}-{slug}`; `?season=2024` picks the season. Season tabs are plain links (work without JavaScript).
 - Wrong or missing slug (`/en/players/278-x`, `/en/players/278`) → permanent redirect to the right slug, keeping `season`.
-- Non-numeric id, unknown player, unknown or invalid season → the localized 404 page.
+- Non-numeric id, unknown player, unknown or invalid season → the localized 404 page (the web checks `season` before calling the api, which answers 400 to a non-numeric one).
 - Page title: "Kylian Mbappé · ScoreFoot.gg"; description with club and season.
 
 ### Layout (player mockup approved 2026-11-02)
@@ -141,7 +141,7 @@ Groups and rows (total and per 90; percentages have no per 90):
 
 ## Decisions (2026-11-02)
 1. Content: everything the PRD lists for the player page, in the mockup's order, without the Compare button.
-2. Radar: same position + season + 5 leagues, at least 900 minutes, per 90, axes above; percentiles computed by SQL per request, no new table.
+2. Radar: same position + season + 5 leagues, at least 900 minutes, per 90, axes above; percentiles computed per request in the api from the season's played lines (one adding-up function for the player and the group), no new table. A player alone in his group gets 100.
 3. Form: last 5 matches played in the chosen season, with opponent, home/away, score, minutes and rating.
 4. Detailed stats: total and per 90 side by side, no toggle; mid-season transfers are added up, the history keeps one row per club.
 5. "Forward" → "Attacker" fixed at import in this branch, then `reimport`.
