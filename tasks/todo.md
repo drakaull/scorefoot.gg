@@ -8,7 +8,7 @@
 - [x] T6. Scaffold `web/`
 - [x] T7. Languages and layout
 - [ ] T8. Home hero and search bar (static)
-- [ ] T9. Server bridge to the api
+- [x] T9. Server bridge to the api
 - [ ] T10. Search combobox (tests first for the logic)
 - [ ] T11. Web in Docker Compose
 - [ ] T12. End-to-end tests

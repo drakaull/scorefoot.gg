@@ -62,7 +62,7 @@ First visible version of ScoreFoot.gg: the home page with the big search bar (dp
 - Accessible: combobox pattern (`role="combobox"`, `aria-expanded`, `aria-activedescendant`, results as `listbox`/`option`).
 
 ### Images
-- Next.js rewrites `/media/*` to the `api`, so images come from our own domain.
+- A Next.js route handler `/media/[...path]` streams images from the `api` (same path rule), so images come from our own domain. Not a `rewrites` entry: it would freeze the api address at build time.
 - Missing photo → initials circle (as in the mockup); missing logo → club code chip.
 
 ## Acceptance criteria
