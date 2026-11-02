@@ -13,4 +13,4 @@
 - [x] T11. Web in Docker Compose
 - [x] T12. End-to-end tests
 - [x] T13. Visual check ✋ (approved 2026-11-02)
-- [ ] T14. Acceptance, docs, review ✋
+- [x] T14. Acceptance, docs, review ✋
