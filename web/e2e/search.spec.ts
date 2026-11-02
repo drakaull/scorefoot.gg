@@ -59,7 +59,7 @@ test("language switch keeps the page and translates it", async ({ page }) => {
   await page.goto("/en/players/278-kylian-mbappe");
   await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "fr" }).click();
   await expect(page).toHaveURL(/\/fr\/players\/278-kylian-mbappe$/);
-  await expect(page.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "5 derniers matchs" })).toBeVisible();
 
   await page.goto("/fr");
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");

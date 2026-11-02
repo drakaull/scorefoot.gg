@@ -96,7 +96,7 @@ ScoreFoot.gg/
 2. It fetches the next batch (leagues, teams, players per page, fixtures, per-match player stats) and upserts it into PostgreSQL.
 3. It downloads new player photos and club logos into the images volume.
 4. It stops at the configured daily budget and resumes on the next run where it left off.
-5. Derived values (percentiles per position, season aggregates) are recomputed in the database after an import.
+5. Nothing is precomputed: season totals and percentiles per position are computed by `api` on each request from the stored lines (under 100 ms locally).
 
 **A visitor opens a player page:**
 1. Browser requests `/en/players/{id}-{slug}` from `web`.

@@ -33,10 +33,11 @@ public static class Search
               SELECT DISTINCT ON (s."PlayerId") s."PlayerId", s."TeamId", s."Position", s."Season",
                      sum(coalesce(s."Minutes", 0)) OVER (PARTITION BY s."PlayerId", s."Season") AS minutes
               FROM "PlayerSeasonStats" s
-              ORDER BY s."PlayerId", s."Season" DESC, s."Minutes" DESC NULLS LAST)
+              WHERE s."Minutes" > 0
+              ORDER BY s."PlayerId", s."Season" DESC, s."Minutes" DESC)
             SELECT p."Id", p."Name", p."PhotoPath", t."Name" AS "Club", l."Position", l."Season"
             FROM "Players" p
-            LEFT JOIN latest l ON l."PlayerId" = p."Id"
+            JOIN latest l ON l."PlayerId" = p."Id" -- players who never played a minute are left out
             LEFT JOIN "Teams" t ON t."Id" = l."TeamId"
             WHERE p."NameSearch" LIKE '%' || {like} || '%' OR {q} <% p."NameSearch"
             ORDER BY CASE WHEN p."NameSearch" LIKE {like} || '%' THEN 0

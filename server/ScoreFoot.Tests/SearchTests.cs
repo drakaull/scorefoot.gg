@@ -24,15 +24,31 @@ public class SearchTests
             P(2, "Ethan Mbappé"),
             P(3, "Mbappe Prefix"),        // starts with the query
             P(4, "Martin Ødegaard"),
-            P(5, "Junior Mbappeau"));    // contains the query mid-word
-        PlayerSeasonStat S(int player, int team, int season, int minutes) =>
-            new() { PlayerId = player, TeamId = team, LeagueId = 61, Season = season, Minutes = minutes, Position = "Attacker" };
+            P(5, "Junior Mbappeau"),     // contains the query mid-word
+            P(6, "Lucas Mbappé"),        // in the squad, never played
+            P(7, "Noah Mbappé"));        // in the squad, minutes not given
         db.PlayerSeasonStats.AddRange(
             S(1, 85, 2024, 2500), S(1, 85, 2025, 3000),
             S(2, 79, 2025, 500),
-            S(3, 79, 2025, 10));
+            S(3, 79, 2025, 10),
+            S(4, 79, 2025, 100),
+            S(5, 79, 2025, 50),
+            S(6, 85, 2025, 0),
+            S(7, 85, 2025, null));
         db.SaveChanges();
         return db;
+    }
+
+    private static PlayerSeasonStat S(int player, int team, int season, int? minutes) =>
+        new() { PlayerId = player, TeamId = team, LeagueId = 61, Season = season, Minutes = minutes, Position = "Attacker" };
+
+    [Fact]
+    public async Task Players_who_never_played_are_left_out()
+    {
+        using var db = Seed();
+        var names = (await Search.RunAsync(db, "mbappe", Ct)).Players.Select(p => p.Name);
+        Assert.DoesNotContain("Lucas Mbappé", names);
+        Assert.DoesNotContain("Noah Mbappé", names);
     }
 
     [Theory]
@@ -86,7 +102,11 @@ public class SearchTests
     {
         using var db = Seed();
         Assert.Empty((await Search.RunAsync(db, "%%", Ct)).Players);
-        for (var i = 0; i < 10; i++) db.Players.Add(new Player { Id = 100 + i, Name = $"Mbappe Clone {i}", NameSearch = $"mbappe clone {i}" });
+        for (var i = 0; i < 10; i++)
+        {
+            db.Players.Add(new Player { Id = 100 + i, Name = $"Mbappe Clone {i}", NameSearch = $"mbappe clone {i}" });
+            db.PlayerSeasonStats.Add(S(100 + i, 79, 2025, 90));
+        }
         await db.SaveChangesAsync(Ct);
         Assert.Equal(Search.MaxPlayers, (await Search.RunAsync(db, "mbappe", Ct)).Players.Count);
     }

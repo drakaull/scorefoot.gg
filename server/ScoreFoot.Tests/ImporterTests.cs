@@ -8,10 +8,12 @@ namespace ScoreFoot.Tests;
 [Collection("db")]
 public class ImporterTests
 {
-    private static async Task ImportAsync(ScoreFootDbContext db, SyncTaskType type, string sample, int? page = null)
+    private static async Task ImportAsync(ScoreFootDbContext db, SyncTaskType type, string sample, int? page = null,
+        Func<string, string>? edit = null)
     {
         var task = new SyncTask { Type = type, LeagueId = 61, Season = 2024, Page = page };
-        await new Importer(db, Build.Options(), DateTimeOffset.UtcNow).ImportAsync(task, Samples.Read(sample));
+        var body = Samples.Read(sample);
+        await new Importer(db, Build.Options(), DateTimeOffset.UtcNow).ImportAsync(task, edit?.Invoke(body) ?? body);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
     }
@@ -70,6 +72,17 @@ public class ImporterTests
         var stat = db.PlayerSeasonStats.Single(s => s.PlayerId == 6);
         Assert.Equal((27, 2276, 6.91m, 87), (stat.Appearances, stat.Minutes, stat.Rating, stat.PassAccuracy));
         Assert.Equal(46, db.SyncTasks.Count(t => t.Type == SyncTaskType.Players)); // pages 2..47
+    }
+
+    [Fact]
+    public async Task Forward_season_position_is_stored_as_attacker()
+    {
+        using var db = TestDb.CreateEmpty();
+        await ImportAsync(db, SyncTaskType.Players, "players-league61-2024-p1.json", page: 1,
+            edit: body => body.Replace("\"position\":\"Attacker\"", "\"position\":\"Forward\""));
+
+        Assert.Equal(0, db.PlayerSeasonStats.Count(s => s.Position == "Forward"));
+        Assert.Equal(2, db.PlayerSeasonStats.Count(s => s.Position == "Attacker"));
     }
 
     [Fact]

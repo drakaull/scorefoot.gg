@@ -30,6 +30,7 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - Conventional Commits (feat, fix, docs, test, chore...)
 - Numbers in tables use tabular figures; ratings always show one decimal
 - Images (photos, logos) are always served by api/, never hotlinked
+- Pages that can answer 404 or redirect (player, club) have no loading.tsx: it would send "200 OK" first. Show navigation feedback with LinkPending instead
 
 ## 04 Security
 - No secrets in code: use untracked .env files

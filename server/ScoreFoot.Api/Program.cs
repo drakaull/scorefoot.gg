@@ -29,6 +29,9 @@ app.MapGet("/search", async (string? q, ScoreFootDbContext db, CancellationToken
         ? Results.Ok(await Search.RunAsync(db, query, ct))
         : Results.BadRequest(new { error = "q must be 2 to 50 characters long" }));
 
+app.MapGet("/players/{id:int}", async (int id, int? season, ScoreFootDbContext db, CancellationToken ct) =>
+    await PlayerPage.LoadAsync(db, id, season, ct) is { } page ? Results.Ok(page) : Results.NotFound());
+
 app.MapGet("/media/{**path}", (string? path, HttpResponse response) =>
 {
     if (Media.Resolve(imagesPath, path) is not { } file || !File.Exists(file)) return Results.NotFound();

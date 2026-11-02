@@ -164,6 +164,8 @@ public sealed class Importer(ScoreFootDbContext db, SyncOptions options, DateTim
             x => x.PlayerId == playerId && x.TeamId == team.Id && x.LeagueId == task.LeagueId && x.Season == task.Season,
             () => new PlayerSeasonStat { PlayerId = playerId, TeamId = team.Id, LeagueId = task.LeagueId, Season = task.Season }, ct);
         FillStatLine(s, stat);
+        // The API names the same position "Attacker" or "Forward" in season lines; keep one label so positions compare.
+        if (s.Position == "Forward") s.Position = "Attacker";
         s.Appearances = Int(stat["games"]?["appearences"]); // sic: API spelling
         s.Lineups = Int(stat["games"]?["lineups"]);
     }
