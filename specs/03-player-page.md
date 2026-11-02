@@ -122,18 +122,18 @@ Groups and rows (total and per 90; percentages have no per 90):
 - Nationality and league names stay as the API gives them (English), as for search.
 
 ## Acceptance criteria
-- [ ] `/en/players/278-kylian-mbappe` shows Mbappé's latest season; `?season=2022` shows 2022-23 with his club of that season.
-- [ ] `/en/players/278-x` redirects to `/en/players/278-kylian-mbappe`; `/en/players/999999999-x` and `?season=2019` show the 404 page.
-- [ ] Mbappé's club history has no PSG 2024-25 row (empty line).
-- [ ] Antoine Semenyo (2025-26, Bournemouth then Manchester City) shows the added-up season and two rows in the club history.
-- [ ] Jadon Sancho in 2025-26 (891 minutes) shows the not-enough-minutes message instead of the radar.
-- [ ] Tom Heaton (never played) is not in search results and `/en/players/2931-tom-heaton` shows the 404 page.
-- [ ] Form shows 0 goals, not "–", for a match where the player did not score.
-- [ ] No season line says "Forward" after `reimport`.
-- [ ] The api answers in under 200 ms locally (20 players, latest and oldest season); the page loads in under 1 s.
-- [ ] `/en` and `/fr` show every label in the right language.
-- [ ] No request to a third-party domain.
-- [ ] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
+- [x] `/en/players/278-kylian-mbappe` shows Mbappé's latest season; `?season=2022` shows 2022-23 with his club of that season.
+- [x] `/en/players/278-x` redirects to `/en/players/278-kylian-mbappe`; `/en/players/999999999-x` and `?season=2019` show the 404 page.
+- [x] Mbappé's club history has no PSG 2024-25 row (empty line).
+- [x] Antoine Semenyo (2025-26, Bournemouth then Manchester City) shows the added-up season and two rows in the club history.
+- [x] Jadon Sancho in 2025-26 (891 minutes) shows the not-enough-minutes message instead of the radar.
+- [x] Tom Heaton (never played) is not in search results and `/en/players/2931-tom-heaton` shows the 404 page.
+- [x] Form shows 0 goals, not "–", for a match where the player did not score.
+- [x] No season line says "Forward" after `reimport`.
+- [x] The api answers in under 200 ms locally (20 players, latest and oldest season); the page loads in under 1 s.
+- [x] `/en` and `/fr` show every label in the right language.
+- [x] No request to a third-party domain.
+- [x] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
 
 ## Tests
 - xUnit (test database): empty lines ignored, never-played player → 404 and absent from search, null counts as 0 but null rating left out, season adding-up across two clubs and weighted rating, latest season default, unknown id / season → 404 data, form order and minutes > 0 filter, percentile values on a small known group (including ties, nulls and the inverted goals-conceded axis), the 900-minute rule, "Forward" → "Attacker" at import.

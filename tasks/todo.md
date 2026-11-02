@@ -12,5 +12,5 @@
 - [x] T10. Form and radar cards
 - [x] T11. Detailed stats and club history cards
 - [x] T12. End-to-end tests
-- [ ] T13. Visual check ✋
+- [x] T13. Visual check ✋
 - [ ] T14. Acceptance, docs, review ✋
