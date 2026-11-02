@@ -1,0 +1,37 @@
+{
+  "Meta": {
+    "title": "ScoreFoot.gg · Football stats for Europe's top 5 leagues",
+    "description": "Stats, ratings and leaderboards for every player and club in the Premier League, La Liga, Serie A, Bundesliga and Ligue 1."
+  },
+  "Header": {
+    "home": "ScoreFoot.gg home page",
+    "language": "Language"
+  },
+  "Home": {
+    "tagline": "Stats for every player in Europe's top 5 leagues"
+  },
+  "Search": {
+    "label": "Search a player or a club",
+    "placeholder": "Search a player or a club…",
+    "shortcut": "Ctrl+K",
+    "players": "Players",
+    "clubs": "Clubs",
+    "loading": "Searching…",
+    "empty": "No player or club found for “{query}”",
+    "error": "Search is unavailable, try again"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "text": "This page does not exist, or not yet.",
+    "back": "Back to home"
+  },
+  "Footer": {
+    "data": "Data: API-Football. Player photos and club logos belong to their owners."
+  },
+  "Position": {
+    "Goalkeeper": "Goalkeeper",
+    "Defender": "Defender",
+    "Midfielder": "Midfielder",
+    "Attacker": "Attacker"
+  }
+}

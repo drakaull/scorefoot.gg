@@ -50,8 +50,28 @@ Pinned in `server/Directory.Packages.props`, `server/global.json`, `server/dotne
 | `postgres` image | 18.6 | Database |
 | `mcr.microsoft.com/dotnet/sdk` image | 10.0.402 | Build stage |
 | `mcr.microsoft.com/dotnet/runtime` image | 10.0.13 | Sync runtime |
+| `mcr.microsoft.com/dotnet/aspnet` image | 10.0.13 | Api runtime |
 
-Deliberately not used: a `.env` loader (Compose passes variables), Testcontainers (tests use the Compose database), a ready-made API-Football client.
+Deliberately not used: a `.env` loader (Compose passes variables), Testcontainers (tests use the Compose database), a ready-made API-Football client, the Npgsql trigram plugin (search is one parameterized SQL query), `Microsoft.AspNetCore.Mvc.Testing` (api logic is tested as plain classes).
+
+### Web pinned versions (approved 2026-11-02)
+Pinned exactly in `web/package.json` and the web Dockerfile.
+
+| Dependency | Version | Use |
+|---|---|---|
+| next, eslint-config-next | 16.4.2 | Framework, lint rules |
+| react, react-dom | 19.3.1 | UI |
+| typescript | 6.0.3 | Types (7.x no longer exposes the JS API Next.js uses) |
+| @types/react, @types/react-dom | 19.3.0 | React types |
+| @types/node | 24.19.2 | Node 24 types |
+| tailwindcss, @tailwindcss/postcss | 4.3.3 | Styling |
+| next-intl | 4.14.9 | EN / FR routing and messages |
+| lucide-react | 1.59.0 | Icons |
+| eslint | 10.13.0 | Lint |
+| vitest | 5.0.5 | Unit tests |
+| @playwright/test | 1.64.1 | End-to-end tests |
+| Plus Jakarta Sans | font files in `web/src/fonts/` (OFL) | Loaded with `next/font/local` |
+| `node` image | 24.22.0-alpine | Web build and runtime |
 
 ## 03 Project Structure
 ```
@@ -82,9 +102,9 @@ ScoreFoot.gg/
 1. Browser requests `/en/players/{id}-{slug}` from `web`.
 2. `web` (server component) calls `api` `GET /players/{id}?season=2025`.
 3. `api` reads PostgreSQL and returns JSON; `web` renders HTML and sends it.
-4. Images load from `api` `/media/...`, never from a third-party domain.
+4. Images load from `web` `/media/...`, a route handler that streams them from `api` `/media/...`, never from a third-party domain.
 
-**Search:** the search bar calls `web`, which calls `api` `GET /search?q=mbape`; PostgreSQL ranks players and clubs with trigram similarity on unaccented names.
+**Search:** the search bar calls `web` `/api/search` (a route handler), which calls `api` `GET /search?q=mbape`; PostgreSQL ranks players and clubs with trigram word similarity on unaccented names. The `api` address (`API_URL`) is read at runtime on the server and never reaches the browser.
 
 ## 05 Data & Privacy
 - No visitor accounts, no visitor data stored, no cookies. Language is in the URL (`/en`, `/fr`).

@@ -19,6 +19,37 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # Read-only JSON api + player and club images. Health is checked by the image's HEALTHCHECK.
+  api:
+    build:
+      context: ./server
+      dockerfile: ScoreFoot.Api/Dockerfile
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5080:8080"
+    volumes:
+      - images:/data/images:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # The website. The browser only talks to this service; it calls the api on the internal network.
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:8080
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
   # One-off job, not started by "docker compose up": docker compose run --rm sync run | status
   sync:
     build:

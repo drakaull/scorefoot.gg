@@ -40,20 +40,21 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - PostgreSQL port bound to 127.0.0.1 only
 
 ## 05 Useful Commands
-Planned commands, to be confirmed when the projects are scaffolded:
 ```
-docker compose up -d db            # start PostgreSQL
+docker compose up -d --build       # whole stack: db, api, web on http://localhost:3000
+docker compose up -d db            # start PostgreSQL only
 docker compose run --rm sync run   # download what is missing (stops at the daily budget), then images
 docker compose run --rm sync status   # progress, no API call
 docker compose run --rm sync run --retry-failed   # put failed tasks back in the queue first
 docker compose run --rm sync reimport   # rebuild players and match rows from saved answers, no API call
 cd server && dotnet run --project ScoreFoot.Api   # api on http://localhost:5080 (run .NET commands from server/ so global.json applies)
-cd web && npm install && npm run dev        # web on http://localhost:3000
-cd server && dotnet test --solution ScoreFoot.sln   # C# tests
+cd web && npm install && npm run dev        # web on http://localhost:3000, calls the api on http://localhost:5080 (API_URL)
+cd server && dotnet test --solution ScoreFoot.sln   # C# tests (needs the db running)
 cd web && npm test                 # Vitest
-cd web && npx playwright test      # end-to-end, Chrome + Firefox
-docker compose up -d --build       # whole stack
+cd web && npm run lint && npm run typecheck
+cd web && npx playwright test      # end-to-end, Chrome + Firefox, against the site on :3000 (needs synced data)
 ```
+- `dotnet run` outside Docker reads the POSTGRES_* variables from the shell, not from `.env`: export them first. It has no images (the images volume only exists in Docker), so `/media` answers 404 locally.
 
 ## 06 When Unsure
 - Check docs/ and specs/ first

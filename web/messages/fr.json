@@ -1,0 +1,37 @@
+{
+  "Meta": {
+    "title": "ScoreFoot.gg · Stats foot des 5 grands championnats européens",
+    "description": "Stats, notes et classements de tous les joueurs et clubs de Premier League, Liga, Serie A, Bundesliga et Ligue 1."
+  },
+  "Header": {
+    "home": "Accueil ScoreFoot.gg",
+    "language": "Langue"
+  },
+  "Home": {
+    "tagline": "Les stats de tous les joueurs des 5 grands championnats européens"
+  },
+  "Search": {
+    "label": "Rechercher un joueur ou un club",
+    "placeholder": "Rechercher un joueur ou un club…",
+    "shortcut": "Ctrl+K",
+    "players": "Joueurs",
+    "clubs": "Clubs",
+    "loading": "Recherche…",
+    "empty": "Aucun joueur ni club trouvé pour « {query} »",
+    "error": "La recherche est indisponible, réessaie"
+  },
+  "NotFound": {
+    "title": "Page introuvable",
+    "text": "Cette page n'existe pas, ou pas encore.",
+    "back": "Retour à l'accueil"
+  },
+  "Footer": {
+    "data": "Données : API-Football. Les photos des joueurs et les logos des clubs appartiennent à leurs propriétaires."
+  },
+  "Position": {
+    "Goalkeeper": "Gardien",
+    "Defender": "Défenseur",
+    "Midfielder": "Milieu",
+    "Attacker": "Attaquant"
+  }
+}
