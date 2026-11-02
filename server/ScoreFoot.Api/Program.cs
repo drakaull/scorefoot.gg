@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ScoreFoot.Api;
 using ScoreFoot.Data;
 
 // Used by the Compose healthcheck: the runtime image has no curl.
@@ -20,6 +21,11 @@ var app = builder.Build();
 
 app.MapGet("/health", async (ScoreFootDbContext db, CancellationToken ct) =>
     await db.Database.CanConnectAsync(ct) ? Results.Ok() : Results.StatusCode(StatusCodes.Status503ServiceUnavailable));
+
+app.MapGet("/search", async (string? q, ScoreFootDbContext db, CancellationToken ct) =>
+    Search.ValidQuery(q) is { } query
+        ? Results.Ok(await Search.RunAsync(db, query, ct))
+        : Results.BadRequest(new { error = "q must be 2 to 50 characters long" }));
 
 app.Run();
 return 0;

@@ -35,6 +35,15 @@ public class SearchTests
         return db;
     }
 
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData(" a ", null)]
+    [InlineData("  mb  ", "mb")]
+    [InlineData("12345678901234567890123456789012345678901234567890", "12345678901234567890123456789012345678901234567890")]
+    [InlineData("123456789012345678901234567890123456789012345678901", null)]
+    public void Query_must_be_2_to_50_characters_after_trimming(string? input, string? expected) =>
+        Assert.Equal(expected, Search.ValidQuery(input));
+
     [Fact]
     public async Task Prefix_first_then_word_prefix_then_stars_before_reserves()
     {

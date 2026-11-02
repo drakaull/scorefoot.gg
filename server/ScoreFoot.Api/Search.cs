@@ -16,6 +16,9 @@ public static class Search
     public const int MaxPlayers = 6;
     public const int MaxClubs = 4;
 
+    /// <summary>Trimmed query when it is 2 to 50 characters long, otherwise null.</summary>
+    public static string? ValidQuery(string? q) => q?.Trim() is { Length: >= 2 and <= 50 } t ? t : null;
+
     private sealed record PlayerRow(int Id, string Name, string? PhotoPath, string? Club, string? Position, int? Season);
     private sealed record ClubRow(int Id, string Name, string? LogoPath, string? League, string? Country);
 
