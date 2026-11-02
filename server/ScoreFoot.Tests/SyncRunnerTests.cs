@@ -120,10 +120,13 @@ public class SyncRunnerTests
         Assert.Equal((requests, tasks), (api.Requests.Count, db.SyncTasks.Count()));
     }
 
-    [Fact]
-    public async Task Season_lines_copied_onto_a_later_club_are_removed()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Season_lines_copied_onto_a_later_club_are_removed(bool withFailedTask)
     {
         using var db = TestDb.CreateEmpty();
+        if (withFailedTask) db.SyncTasks.Add(new SyncTask { Type = SyncTaskType.FixtureDetails, LeagueId = 61, Season = 2022, Status = SyncTaskStatus.Failed });
         db.Leagues.Add(new League { Id = 61, Name = "Ligue 1" });
         db.Teams.AddRange(
             new Team { Id = 1, Name = "Reims", NameSearch = "reims" },
@@ -139,8 +142,9 @@ public class SyncRunnerTests
             new PlayerSeasonStat { PlayerId = 11, TeamId = 2, LeagueId = 61, Season = 2022, Minutes = 500 });              // no match line: kept
         await db.SaveChangesAsync(Ct);
 
-        Assert.Equal(1, await Build.Runner(db, new FakeApi(FakeLigue1), Build.Options()).PruneTransferCopiesAsync(Ct));
+        // With a failed task the cleanup waits: the missing match lines could be the real club's.
+        Assert.Equal(withFailedTask ? 0 : 1, await Build.Runner(db, new FakeApi(FakeLigue1), Build.Options()).PruneTransferCopiesAsync(Ct));
 
-        Assert.Equal([(10, 1), (11, 2)], db.PlayerSeasonStats.OrderBy(s => s.PlayerId).Select(s => new { s.PlayerId, s.TeamId }).AsEnumerable().Select(s => (s.PlayerId, s.TeamId)));
+        Assert.Equal(withFailedTask ? [(10, 1), (10, 2), (11, 2)] : [(10, 1), (11, 2)],db.PlayerSeasonStats.OrderBy(s => s.PlayerId).Select(s => new { s.PlayerId, s.TeamId }).AsEnumerable().Select(s => (s.PlayerId, s.TeamId)));
     }
 }

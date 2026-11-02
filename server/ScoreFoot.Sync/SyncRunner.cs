@@ -130,6 +130,13 @@ public sealed class SyncRunner(ScoreFootDbContext db, ApiFootballClient api, Syn
     /// </summary>
     public async Task<int> PruneTransferCopiesAsync(CancellationToken ct = default)
     {
+        // A failed match batch would make a real club's line look like a copy, and retrying it does not bring the line back.
+        if (await db.SyncTasks.CountAsync(t => t.Status == SyncTaskStatus.Failed, ct) is > 0 and var failedTasks)
+        {
+            log.LogWarning("Cleanup skipped: {Count} failed tasks (rerun with: run --retry-failed)", failedTasks);
+            return 0;
+        }
+
         var deleted = await db.PlayerSeasonStats
             .Where(s => s.Minutes > 0
                 && !db.FixturePlayerStats.Any(f => f.PlayerId == s.PlayerId && f.TeamId == s.TeamId && f.Fixture.LeagueId == s.LeagueId && f.Fixture.Season == s.Season)
