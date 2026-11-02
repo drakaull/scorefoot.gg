@@ -6,7 +6,7 @@
 - [x] T4. `GET /search` endpoint
 - [x] T5. `GET /media/{**path}` (tests first)
 - [x] T6. Scaffold `web/`
-- [ ] T7. Languages and layout
+- [x] T7. Languages and layout
 - [ ] T8. Home hero and search bar (static)
 - [ ] T9. Server bridge to the api
 - [ ] T10. Search combobox (tests first for the logic)
