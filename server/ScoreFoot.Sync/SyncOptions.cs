@@ -10,5 +10,6 @@ public sealed class SyncOptions
     public int MinDelayMs { get; set; }
     public int FixtureBatchSize { get; set; } = 20;
     public int[] RetryDelaysSeconds { get; set; } = [];
+    public int MinImageDelayMs { get; set; } = 500;
     public string ImagesPath { get; set; } = "images";
 }

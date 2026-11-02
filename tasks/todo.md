@@ -9,7 +9,7 @@
 - [x] T7. Task planner
 - [x] T8. Parsers and upserts
 - [x] T9. `run` command and error handling
-- [ ] T10. Image download
-- [ ] T11. `status` command
+- [x] T10. Image download
+- [x] T11. `status` command
 - [ ] T12. `sync` in Docker Compose + first real run ✋
 - [ ] T13. Acceptance (before 2026-12-02) ✋

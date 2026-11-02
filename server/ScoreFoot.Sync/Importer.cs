@@ -86,6 +86,7 @@ public sealed class Importer(ScoreFootDbContext db, SyncOptions options, DateTim
         var league = await FindOrAddAsync(db.Leagues, Int(n["id"])!.Value, id => new League { Id = id, Name = "" }, ct);
         league.Name = Str(n["name"]) ?? league.Name;
         league.Country = Str(n["country"]) ?? league.Country;
+        league.LogoUrl = Str(n["logo"]) ?? league.LogoUrl;
         return league;
     }
 
