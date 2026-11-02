@@ -67,7 +67,7 @@ public sealed class Importer(ScoreFootDbContext db, SyncOptions options, DateTim
             case SyncTaskType.Players:
                 foreach (var item in response)
                 {
-                    var player = await UpsertPlayerAsync(item!["player"]!, ct);
+                    var player = await UpsertPlayerAsync(item!["player"]!, fromMatch: false, ct);
                     foreach (var stat in item["statistics"]!.AsArray())
                     {
                         // A player's list can include other competitions; keep only the one this task is about.
@@ -101,13 +101,15 @@ public sealed class Importer(ScoreFootDbContext db, SyncOptions options, DateTim
         return team;
     }
 
-    private async Task<Player> UpsertPlayerAsync(JsonNode n, CancellationToken ct)
+    /// <param name="fromMatch">Match lines give the full common name ("Achraf Hakimi"), the players endpoint a short one ("A. Hakimi"): match lines win, so the result does not depend on task order.</param>
+    private async Task<Player> UpsertPlayerAsync(JsonNode n, bool fromMatch, CancellationToken ct)
     {
         var player = await FindOrAddAsync(db.Players, Int(n["id"])!.Value, id => new Player { Id = id, Name = "", NameSearch = "" }, ct);
-        player.Name = Str(n["name"]) ?? player.Name;
-        player.NameSearch = SearchText.Normalize(player.Name);
+        if (fromMatch || player.Name == "") player.Name = Str(n["name"]) ?? player.Name;
         player.FirstName = Str(n["firstname"]) ?? player.FirstName;
         player.LastName = Str(n["lastname"]) ?? player.LastName;
+        // "E. Haaland" alone would not match a search for "erling".
+        player.NameSearch = SearchText.Normalize(string.Join(' ', new[] { player.Name, player.FirstName, player.LastName }.Where(s => !string.IsNullOrWhiteSpace(s))));
         player.BirthDate = DateOnly.TryParse(Str(n["birth"]?["date"]), CultureInfo.InvariantCulture, out var birth) ? birth : player.BirthDate;
         player.Nationality = Str(n["nationality"]) ?? player.Nationality;
         player.HeightCm = Int(n["height"]) ?? player.HeightCm;
@@ -169,7 +171,7 @@ public sealed class Importer(ScoreFootDbContext db, SyncOptions options, DateTim
     private async Task UpsertFixturePlayerStatAsync(int fixtureId, int teamId, JsonNode p, CancellationToken ct)
     {
         // Match lines only give id, name and photo; the full profile comes from the players endpoint.
-        var player = await UpsertPlayerAsync(p["player"]!, ct);
+        var player = await UpsertPlayerAsync(p["player"]!, fromMatch: true, ct);
         var stat = p["statistics"]![0]!;
         var s = await FindOrAddAsync(db.FixturePlayerStats,
             x => x.FixtureId == fixtureId && x.PlayerId == player.Id,

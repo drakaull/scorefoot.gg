@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ScoreFoot.Data;
 using ScoreFoot.Sync;
 
@@ -101,5 +102,21 @@ public class SyncRunnerTests
 
         Assert.Equal(RunResult.Completed, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
         Assert.True(db.SyncTasks.All(t => t.Status == SyncTaskStatus.Done));
+    }
+
+    [Fact]
+    public async Task Reimport_rebuilds_rows_from_saved_answers_without_api_calls()
+    {
+        using var db = TestDb.CreateEmpty();
+        var api = new FakeApi(FakeLigue1);
+        await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct);
+        await db.Players.Where(p => p.Id == 9).ExecuteUpdateAsync(u => u.SetProperty(p => p.Name, "broken"), Ct);
+        var (requests, tasks) = (api.Requests.Count, db.SyncTasks.Count());
+
+        await Build.Runner(db, api, Build.Options()).ReimportAsync(Ct);
+
+        db.ChangeTracker.Clear();
+        Assert.Equal("Achraf Hakimi", db.Players.Single(p => p.Id == 9).Name);
+        Assert.Equal((requests, tasks), (api.Requests.Count, db.SyncTasks.Count()));
     }
 }

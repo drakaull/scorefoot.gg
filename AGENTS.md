@@ -46,6 +46,7 @@ docker compose up -d db            # start PostgreSQL
 docker compose run --rm sync run   # download what is missing (stops at the daily budget), then images
 docker compose run --rm sync status   # progress, no API call
 docker compose run --rm sync run --retry-failed   # put failed tasks back in the queue first
+docker compose run --rm sync reimport   # rebuild players and match rows from saved answers, no API call
 cd server && dotnet run --project ScoreFoot.Api   # api on http://localhost:5080 (run .NET commands from server/ so global.json applies)
 cd web && npm install && npm run dev        # web on http://localhost:3000
 cd server && dotnet test --solution ScoreFoot.sln   # C# tests

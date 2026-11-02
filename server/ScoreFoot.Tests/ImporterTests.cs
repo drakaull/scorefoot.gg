@@ -85,4 +85,20 @@ public class ImporterTests
 
         Assert.Equal(counts, (db.Players.Count(), db.FixturePlayerStats.Count(), db.PlayerSeasonStats.Count(), db.Teams.Count()));
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Match_names_win_whatever_the_order(bool playersFirst)
+    {
+        using var db = TestDb.CreateEmpty();
+        if (playersFirst) await ImportAsync(db, SyncTaskType.Players, "players-league61-2024-p1.json", page: 2);
+        await ImportAsync(db, SyncTaskType.FixtureDetails, "fixtures-ids-batch.json");
+        if (!playersFirst) await ImportAsync(db, SyncTaskType.Players, "players-league61-2024-p1.json", page: 2);
+
+        var hakimi = db.Players.Single(p => p.Id == 9);
+        Assert.Equal("Achraf Hakimi", hakimi.Name); // the players endpoint says "A. Hakimi"
+        Assert.Contains("achraf hakimi", hakimi.NameSearch);
+        Assert.Contains(SearchText.Normalize(hakimi.LastName!), hakimi.NameSearch);
+    }
 }

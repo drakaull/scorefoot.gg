@@ -6,9 +6,9 @@ using ScoreFoot.Data;
 using ScoreFoot.Sync;
 
 var command = args.FirstOrDefault();
-if (command is not ("run" or "status"))
+if (command is not ("run" or "status" or "reimport"))
 {
-    Console.Error.WriteLine("Usage: ScoreFoot.Sync run [--retry-failed] | status");
+    Console.Error.WriteLine("Usage: ScoreFoot.Sync run [--retry-failed] | status | reimport");
     return 1;
 }
 
@@ -38,6 +38,12 @@ await db.Database.MigrateAsync();
 if (command == "status")
 {
     Console.WriteLine(await StatusReport.BuildAsync(db, options, TimeProvider.System));
+    return 0;
+}
+
+if (command == "reimport")
+{
+    await services.GetRequiredService<SyncRunner>().ReimportAsync();
     return 0;
 }
 

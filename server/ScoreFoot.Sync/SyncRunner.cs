@@ -95,6 +95,32 @@ public sealed class SyncRunner(ScoreFootDbContext db, ApiFootballClient api, Syn
         }
     }
 
+    /// <summary>
+    /// Re-applies every saved players and match-detail answer, in their original order, without any API call.
+    /// Used after a fix to the import (e.g. player names before 2026-11-02). Match lists are skipped:
+    /// they would plan detail tasks again.
+    /// </summary>
+    public async Task<int> ReimportAsync(CancellationToken ct = default)
+    {
+        var saved = await db.RawResponses
+            .Where(r => r.Endpoint == "players" || r.Endpoint == "fixtures" && !r.Parameters.StartsWith("league="))
+            .OrderBy(r => r.Id).Select(r => r.Id).ToListAsync(ct);
+        foreach (var id in saved)
+        {
+            db.ChangeTracker.Clear();
+            var raw = await db.RawResponses.SingleAsync(r => r.Id == id, ct);
+            var query = raw.Parameters.Split('&').Select(p => p.Split('=')).ToDictionary(p => p[0], p => p[1]);
+            // Page left empty on purpose: page 1 would plan the follow-up pages again.
+            var task = raw.Endpoint == "players"
+                ? new SyncTask { Type = SyncTaskType.Players, LeagueId = int.Parse(query["league"]), Season = int.Parse(query["season"]) }
+                : new SyncTask { Type = SyncTaskType.FixtureDetails };
+            await new Importer(db, options, clock.GetUtcNow()).ImportAsync(task, raw.Body, ct);
+            await db.SaveChangesAsync(ct);
+        }
+        log.LogInformation("Re-imported {Count} saved answers", saved.Count);
+        return saved.Count;
+    }
+
     private async Task MarkFailedAsync(SyncTask task, string error, CancellationToken ct)
     {
         task.Status = SyncTaskStatus.Failed;
