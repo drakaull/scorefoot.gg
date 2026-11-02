@@ -3,7 +3,7 @@
 Status: approved (2026-11-02).
 
 ## Goal
-Fill our PostgreSQL database with everything the v1 pages need (PRD §05) for the top 5 leagues over seasons 2022-23, 2023-24 and 2024-25, using the API-Football free plan, without ever exceeding its quota.
+Fill our PostgreSQL database with everything the v1 pages need (PRD §05) for the top 5 leagues over the four complete seasons 2022-23 to 2025-26, using one month of the API-Football Pro plan, without ever exceeding the quota. The same code must keep working on the free plan for later updates.
 
 ## Scope
 - Database schema (EF Core entities + first migration) in `ScoreFoot.Data`.
@@ -23,24 +23,27 @@ Fill our PostgreSQL database with everything the v1 pages need (PRD §05) for th
 | `API_FOOTBALL_KEY` | `.env` (git-ignored) | the key, never logged |
 | `DATABASE_URL` / connection string | `.env` | local PostgreSQL |
 | Leagues | `appsettings.json` | 39 Premier League, 140 La Liga, 135 Serie A, 78 Bundesliga, 61 Ligue 1 |
-| Seasons | `appsettings.json` | 2024, 2023, 2022 (processed in this order) |
-| Daily budget | `appsettings.json` | 95 requests (5 kept for manual tests) |
-| Min delay between API calls | `appsettings.json` | 7 s (free plan is reported at 10 requests/minute) |
+| Seasons | `appsettings.json` | 2025, 2024, 2023, 2022 (processed in this order) |
+| Daily budget | `appsettings.json` | 7,000 on Pro (500 kept spare); 95 on the free plan |
+| Min delay between API calls | `appsettings.json` | 300 ms on Pro (limit 300/minute); 7 s on the free plan |
+| Fixture batch size | `appsettings.json` | 20 on Pro (`ids` parameter); 1 on the free plan (`id` parameter, `ids` is refused) |
 
 `.env.example` lists the variable names with empty values.
 
 ## API-Football endpoints used
-Facts from API-Football guides; items marked (verify) are checked in the first task with a real call.
+All facts below were checked with real calls on 2026-11-02 (free plan, then Pro).
 | Data | Endpoint | Calls per league-season |
 |---|---|---|
-| Quota left | `GET /status` | not counted (verify) |
+| Quota left | `GET /status` | not counted; its counter lagged on the free plan, so our own `ApiCall` log is the source of truth |
 | Clubs + logos | `GET /teams?league&season` | 1 |
 | Table | `GET /standings?league&season` | 1 |
 | Match list | `GET /fixtures?league&season` | 1 |
-| Match details (events, lineups, team stats, player stats with ratings) | `GET /fixtures?ids=a-b-c…` up to 20 ids (verify) | 16–19 |
-| Players (profile, photo, season stats per club) | `GET /players?league&season&page=N`, 20 per page | ~30–35 |
+| Match details (events, lineups, team stats, player stats with ratings) | `GET /fixtures?ids=a-b-c…` up to 20 ids (Pro), or `GET /fixtures?id=x` (free) | 16–19 on Pro |
+| Players (profile, photo, season stats per club) | `GET /players?league&season&page=N`, 20 per page | ~45–55 (Ligue 1 2024: 47 pages) |
 
-**Budget estimate:** ~55 calls per league-season → ~280 per season → ~840 for 3 seasons → **about 9 days** at 95 a day. Season 2024-25 is complete after about 3 days.
+**Budget estimate:** ~72 calls per league-season → ~360 per season → **~1,450 for 4 seasons**, one run on the Pro plan (about 10 minutes of API calls plus image downloads).
+
+The match list includes play-off matches (Ligue 1 2024-25: 308 = 306 + 2 relegation play-offs). Finished statuses are `FT`, `AET` and `PEN`.
 
 Images (`media.api-sports.io`) are reported as not counted in the quota but rate limited: download at most 2 per second, and only images we do not have yet.
 
@@ -59,9 +62,9 @@ Images (`media.api-sports.io`) are reported as not counted in the quota but rate
 Names stored as returned by the API; a lower-case unaccented copy is stored for search.
 
 ## How `run` works
-1. Read today's count from `ApiCall` (and `/status` if it is free). Stop if the budget is reached.
-2. If no tasks exist for a league-season, create them in order: teams → standings → fixtures → players page 1. Fixture-detail tasks are created after the match list arrives (finished matches only, in batches of 20). Further player pages are created after page 1 gives `paging.total`.
-3. Take the next pending task (season order 2024 → 2023 → 2022, then league order), call the API, wait the min delay.
+1. Read today's count from `ApiCall`. Stop if the budget is reached.
+2. If no tasks exist for a league-season, create them in order: teams → standings → fixtures → players page 1. Fixture-detail tasks are created after the match list arrives (finished matches only, in batches of the configured size). Further player pages are created after page 1 gives `paging.total`.
+3. Take the next pending task (season order 2025 → 2024 → 2023 → 2022, then league order), call the API, wait the min delay.
 4. In one database transaction: save the `RawResponse`, upsert the parsed rows, mark the task done.
 5. Download missing images for the rows just saved.
 6. Loop until the budget is reached or no task is left. Print a summary.
@@ -78,20 +81,22 @@ Prints, without calling the API: requests used today / budget, tasks done / tota
 - `run --retry-failed` puts failed tasks back to pending.
 
 ## Acceptance criteria
-- [ ] `docker compose up -d db` starts PostgreSQL 18, reachable only on 127.0.0.1.
-- [ ] `docker compose run --rm sync run` never makes more than the daily budget, even when run twice the same day.
-- [ ] Killing the run mid-way and restarting it loses nothing and duplicates nothing.
-- [ ] After the 3 seasons are synced: 5 leagues × 3 seasons of teams, standings and finished fixtures exist; every finished fixture has player stats; each league-season has at least 450 players.
-- [ ] Every team has a logo file and at least 95% of players have a photo file in the images volume.
-- [ ] The API key never appears in logs, the database or git.
-- [ ] `status` shows progress without spending quota.
+- [x] `docker compose up -d db` starts PostgreSQL 18, reachable only on 127.0.0.1.
+- [x] `docker compose run --rm sync run` never makes more than the daily budget, even when run twice the same day.
+- [x] Killing the run mid-way and restarting it loses nothing and duplicates nothing.
+- [x] After the 4 seasons are synced: 5 leagues × 4 seasons of teams, standings and finished fixtures exist; every finished fixture has player stats; each league-season has at least 450 players.
+- [x] Every team has a logo file and at least 95% of players have a photo file in the images volume.
+- [x] The API key never appears in logs, the database or git.
+- [x] `status` shows progress without spending quota.
 
 ## Tests (xUnit)
-- Budget guard: with 95 calls logged today, no call is made.
-- Task planning: fixtures list → correct number of detail tasks of max 20 ids, finished matches only.
+- Budget guard: with the budget already used today, no call is made.
+- Task planning: fixtures list → correct number of detail tasks for batch size 20 and batch size 1, finished matches only.
 - Parsing: a saved sample of each endpoint's JSON maps to the expected rows (fixtures in `ScoreFoot.Tests/Fixtures/`, real responses with no key inside).
 - Upsert: the same response parsed twice gives the same row counts.
 - Error handling: quota error stops the run; plan error marks one task failed and continues.
 
-## First task: verify the API facts
-With 3 real calls (out of 100): `/status` (counts or not?), `/fixtures?ids=` with 20 ids from 2024 (allowed on free plan? contains players and ratings?), `/players?league=61&season=2024&page=1` (20 per page, `paging.total`, stats fields). Answers are saved as test fixtures and this spec is updated if something differs.
+## Verified facts (T1, 2026-11-02)
+- Free plan: `ids` refused ("Free plans do not have access to the Ids parameter."), `id` works, seasons 2022–2024 only.
+- Pro plan: `ids` with 20 fixtures returns events, lineups, statistics and players with ratings; season 2025 available; `x-ratelimit-limit: 300` per minute, 7,500 per day.
+- Saved test fixtures in `server/ScoreFoot.Tests/Fixtures/`: match list, single match, 20-match batch, players page, plan error.

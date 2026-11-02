@@ -3,7 +3,7 @@
 ## 01 Product Overview
 - **Product Name:** ScoreFoot.gg
 - **Tagline:** Search any player or club from Europe's top 5 leagues and read their stats at a glance.
-- **Description:** A football stats website inspired by dpm.lol: a central search bar leads to dense, readable player and club pages, plus leaderboards and a player comparator. It covers the Premier League, La Liga, Serie A, Bundesliga and Ligue 1 over three seasons (2022-23 to 2024-25). Built as a portfolio project, designed so it could be deployed later.
+- **Description:** A football stats website inspired by dpm.lol: a central search bar leads to dense, readable player and club pages, plus leaderboards and a player comparator. It covers the Premier League, La Liga, Serie A, Bundesliga and Ligue 1 over four complete seasons (2022-23 to 2025-26). Built as a portfolio project, designed so it could be deployed later.
 
 ## 02 Problem
 - Football stats are spread across many sites, often cluttered with ads, betting and news.
@@ -20,7 +20,7 @@
 ## 05 Core Features (Version 1)
 Keep this list tight. Each feature gets its own spec in specs/NN-name.md before it is built.
 - **Search:** Central search bar with autocomplete across all players and clubs of the 5 leagues.
-- **Player page:** Season stats, form over the last 5 matches with a rating per match, club history across the 3 seasons, percentile radar against players in the same position.
+- **Player page:** Season stats, form over the last 5 matches with a rating per match, club history across the 4 seasons, percentile radar against players in the same position.
 - **Club page:** League position, recent form, squad, top players, season results.
 - **Leaderboards:** Rankings by stat (goals, assists, rating, dribbles, tackles…), filterable by league, season, position and age.
 - **Comparator:** Two players side by side with overlaid radars and stat table.
@@ -28,7 +28,7 @@ Keep this list tight. Each feature gets its own spec in specs/NN-name.md before 
 
 ## 06 Out of Scope (for now)
 - User accounts and any personal data (favourites, if added, stay in the browser).
-- Current season and live scores (the free API plan only covers 2022 to 2024).
+- Current season (2026-27) and live scores: a frozen mid-season snapshot would look wrong once the paid month ends.
 - Competitions other than the top 5 leagues (Champions League, cups, national teams).
 - Match pages, team of the week, "in form" trends, player tier list.
 - Shot maps / xG visuals (StatsBomb open data), end-of-season simulator.
@@ -36,13 +36,13 @@ Keep this list tight. Each feature gets its own spec in specs/NN-name.md before 
 - Betting, ads, analytics, trackers.
 
 ## 07 Data Constraints
-- Single source: API-Football, free plan (100 requests per day, seasons 2022 to 2024).
+- Single source: API-Football. One month of the Pro plan (7,500 requests per day, 300 per minute, until 2026-12-02) for the initial download; the free plan (100 per day, seasons 2022 to 2024 only) is enough for small updates later.
 - The website never calls the API while a visitor browses. A sync script fills our own database; the site reads only from it.
-- Initial sync is spread over several days to stay within the daily quota. Estimate to confirm with the real API: about 150 requests per season for player stats, plus per-match data (ratings, lineups). If per-match data must be fetched one match at a time, it costs about 1,900 requests per season (about 19 days per season); fetching it in batches would cut that a lot.
+- Initial download: about 1,450 requests for the 4 seasons (match details fetched 20 per request, a Pro-only feature), done in one day before the Pro month ends.
 - The code must not hard-code the season, so switching to a paid plan and the current season later only means re-running the sync.
 
 ## 08 Success Metrics
-- Every player who played in the top 5 leagues in the 3 seasons is findable via search.
+- Every player who played in the top 5 leagues in the 4 seasons is findable via search.
 - Any page loads in under 1 second locally.
 - All interface text exists in English and French.
 - The site works on desktop and at 390 px width, in Chrome and Firefox.

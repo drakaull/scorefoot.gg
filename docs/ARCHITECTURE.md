@@ -26,13 +26,32 @@ Major versions below; the exact patch version is pinned at install time and must
 | Backend    | ASP.NET Core 10 (LTS) Minimal API, C# |
 | Data access| Entity Framework Core 10 + Npgsql |
 | Sync       | .NET 10 console app, run by hand or on a schedule |
-| Database   | PostgreSQL 18 with `pg_trgm` and `unaccent` extensions (fuzzy, accent-insensitive search) |
+| Database   | PostgreSQL 18 with the `pg_trgm` extension (fuzzy search) on a lower-case, accent-free name column computed in C# (`SearchText.Normalize`), so `unaccent` is not needed |
 | Charts     | Hand-written SVG (radar, form bars), no chart library |
 | Auth       | None in v1 |
 | Email      | None |
 | Hosting    | Not chosen. Everything runs with Docker Compose so it can move to any server |
 | Testing    | xUnit (C#), Vitest (TS logic), Playwright (end-to-end, Chrome + Firefox) |
 | Runtime images | `node:24` (LTS) for web, `mcr.microsoft.com/dotnet/aspnet:10.0` for api, `postgres:18` |
+
+### Pinned versions (approved 2026-11-02)
+Pinned in `server/Directory.Packages.props`, `server/global.json`, `server/dotnet-tools.json` and `docker-compose.yml`.
+
+| Dependency | Version | Use |
+|---|---|---|
+| .NET SDK | 10.0.402 | Build (`global.json`) |
+| Npgsql.EntityFrameworkCore.PostgreSQL | 10.0.3 | EF Core provider for PostgreSQL |
+| Microsoft.EntityFrameworkCore.Relational | 10.0.13 | Pinned so every project uses the same EF Core version (Npgsql alone resolves 10.0.4) |
+| Microsoft.EntityFrameworkCore.Design | 10.0.13 | Migrations |
+| dotnet-ef (local tool) | 10.0.13 | Migrations CLI |
+| Microsoft.Extensions.Hosting | 10.0.13 | Config, logging, DI in the console app |
+| Microsoft.Extensions.Http | 10.0.13 | Typed `HttpClient` |
+| xunit.v3 | 4.0.2 | Tests, run with Microsoft.Testing.Platform (set in `global.json`, so `xunit.runner.visualstudio` and `Microsoft.NET.Test.Sdk` are not needed) |
+| `postgres` image | 18.6 | Database |
+| `mcr.microsoft.com/dotnet/sdk` image | 10.0.402 | Build stage |
+| `mcr.microsoft.com/dotnet/runtime` image | 10.0.13 | Sync runtime |
+
+Deliberately not used: a `.env` loader (Compose passes variables), Testcontainers (tests use the Compose database), a ready-made API-Football client.
 
 ## 03 Project Structure
 ```
@@ -52,16 +71,16 @@ ScoreFoot.gg/
 ```
 
 ## 04 Data Flow
-**Sync (offline, a few times per day until the 3 seasons are complete):**
-1. `sync` reads its progress from the database and checks today's remaining quota (API-Football `/status`).
+**Sync (offline, run by hand; one run downloads everything on the Pro plan):**
+1. `sync` reads its progress from the database and counts today's calls from its own log.
 2. It fetches the next batch (leagues, teams, players per page, fixtures, per-match player stats) and upserts it into PostgreSQL.
 3. It downloads new player photos and club logos into the images volume.
-4. It stops before reaching 100 requests and resumes the next day where it left off.
+4. It stops at the configured daily budget and resumes on the next run where it left off.
 5. Derived values (percentiles per position, season aggregates) are recomputed in the database after an import.
 
 **A visitor opens a player page:**
 1. Browser requests `/en/players/{id}-{slug}` from `web`.
-2. `web` (server component) calls `api` `GET /players/{id}?season=2024`.
+2. `web` (server component) calls `api` `GET /players/{id}?season=2025`.
 3. `api` reads PostgreSQL and returns JSON; `web` renders HTML and sends it.
 4. Images load from `api` `/media/...`, never from a third-party domain.
 

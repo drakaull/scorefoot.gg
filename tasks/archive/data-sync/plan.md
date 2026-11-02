@@ -6,9 +6,7 @@ Each task: build, test, verify, commit. ✋ = checkpoint where Léonard validate
 ## Phase 1 — Verify and set up
 **T1. Verify the API facts** ✋
 - Léonard creates `.env` from `.env.example` and pastes the key himself (never in chat).
-- 3 calls: `/fixtures?ids=` (20 finished 2024 Ligue 1 matches), `/players?league=61&season=2024&page=1`, then `/status` before and after to see what counts.
-- Save the two JSON answers as test fixtures (they contain no key or personal data). `/status` is not saved (it holds Léonard's email).
-- Done when: the spec is updated with confirmed facts, or with a new budget if something differs.
+- Done 2026-11-02: free plan refuses `ids`, Pro accepts it; facts recorded in the spec.
 
 **T2. Choose and approve dependencies** ✋
 - List exact versions (published ≥ 2 weeks ago, checked on NuGet / Docker Hub): Npgsql EF Core provider 10, EF Core Design + `dotnet-ef` tool, Microsoft.Extensions.Hosting, xUnit + test SDK, `postgres:18` image, `dotnet/sdk:10.0` and `dotnet/runtime:10.0` images.
@@ -24,16 +22,16 @@ Each task: build, test, verify, commit. ✋ = checkpoint where Léonard validate
 
 ## Phase 2 — Data model
 **T5. Entities and first migration**
-- All tables from the spec, unique keys on api ids, `pg_trgm` and `unaccent` extensions.
+- All tables from the spec, unique keys on api ids, `pg_trgm` extension and trigram indexes on normalized names.
 - Done when: migration applies on an empty database; tables listed with `\dt`.
 
 ## Phase 3 — Sync engine (tests first)
 **T6. API client and budget guard**
-- Typed HTTP client, key from environment, 7 s min delay, every call logged in `ApiCall`, never more than the budget.
+- Typed HTTP client, key from environment, configurable min delay (300 ms Pro / 7 s free), every call logged in `ApiCall`, never more than the budget.
 - Tests: budget reached → no call; key never in logs.
 
 **T7. Task planner**
-- Creates tasks per league-season in order; detail tasks in batches of 20 finished matches; player pages from `paging.total`.
+- Creates tasks per league-season in order; detail tasks in batches of the configured size (20 Pro, 1 free), finished matches only; player pages from `paging.total`.
 - Tests: counts and order from the saved fixtures.
 
 **T8. Parsers and upserts**
@@ -54,8 +52,8 @@ Each task: build, test, verify, commit. ✋ = checkpoint where Léonard validate
 ## Phase 4 — Real run
 **T12. `sync` in Docker Compose + first real run** ✋
 - Dockerfile for Sync, `docker compose run --rm sync run`.
-- Done when: the first day's run stops at 95 calls, `status` matches, the database has 2024-25 teams, standings and fixtures.
+- Done when: the run completes on the Pro plan (~1,450 calls) or stops cleanly at the budget, and `status` matches the database.
 
-**T13. Daily runs until complete + acceptance** ✋
-- Léonard runs it once a day (~9 days). Then check every acceptance criterion of the spec.
+**T13. Acceptance** ✋
+- Must happen before the Pro plan ends on 2026-12-02. Check every acceptance criterion of the spec.
 - Done when: all criteria are ticked; review, then merge into `develop` after approval.

@@ -17,7 +17,7 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - TypeScript in strict mode in web/. No `any` without a one-line reason
 - C# with nullable reference types enabled and warnings as errors in server/
 - web/ never queries the database or API-Football: it only calls api/
-- Only ScoreFoot.Sync calls API-Football, and it must never exceed 100 requests per day
+- Only ScoreFoot.Sync calls API-Football, and it must never exceed the configured daily budget
 - Never hard-code a season or a league id: they come from configuration or the database
 - Every UI string goes through next-intl, with both en.json and fr.json filled
 - Before choosing a library version or writing code against a library, check its current docs with Context7
@@ -43,10 +43,13 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 Planned commands, to be confirmed when the projects are scaffolded:
 ```
 docker compose up -d db            # start PostgreSQL
-docker compose run --rm sync       # run one sync batch (stops before the daily quota)
-dotnet run --project server/ScoreFoot.Api   # api on http://localhost:5080
+docker compose run --rm sync run   # download what is missing (stops at the daily budget), then images
+docker compose run --rm sync status   # progress, no API call
+docker compose run --rm sync run --retry-failed   # put failed tasks back in the queue first
+docker compose run --rm sync reimport   # rebuild players and match rows from saved answers, no API call
+cd server && dotnet run --project ScoreFoot.Api   # api on http://localhost:5080 (run .NET commands from server/ so global.json applies)
 cd web && npm install && npm run dev        # web on http://localhost:3000
-dotnet test server/ScoreFoot.sln   # C# tests
+cd server && dotnet test --solution ScoreFoot.sln   # C# tests
 cd web && npm test                 # Vitest
 cd web && npx playwright test      # end-to-end, Chrome + Firefox
 docker compose up -d --build       # whole stack
