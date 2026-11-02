@@ -3,12 +3,18 @@
 import { LoaderCircle, Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { type SearchResults, validQuery } from "@/lib/api";
 import { createSearch, fetchSearch, type SearchState } from "@/lib/search-client";
 import { entityPath } from "@/lib/slug";
 
 type Item = { key: string; href: string; name: string; sub: string; image: string | null; round: boolean };
+type Shown = { query: string; results: SearchResults };
+
+// Same order as the list: players first, then clubs.
+const firstHref = ({ players: [p], clubs: [c] }: SearchResults) =>
+  p ? entityPath("players", p.id, p.name) : c ? entityPath("clubs", c.id, c.name) : null;
 
 const initials = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
@@ -23,7 +29,27 @@ export function SearchBox() {
   const [state, setState] = useState<SearchState>({ status: "idle" });
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const search = useMemo(() => createSearch(fetchSearch, setState), []);
+  // Last answer, kept on screen while the next one loads so the list does not flicker.
+  const [shown, setShown] = useState<Shown | null>(null);
+  // Enter pressed before the answer for the typed text arrived: open its first result when it does.
+  const pendingEnter = useRef(false);
+  // Created on the first key press (refs may only be used outside render).
+  const searchRef = useRef<ReturnType<typeof createSearch>>(null);
+  const search = (input: string) => {
+    searchRef.current ??= createSearch(fetchSearch, (s) => {
+      setState(s);
+      if (s.status === "idle" || s.status === "error") setShown(null);
+      if (s.status !== "done") return;
+      setShown({ query: s.query, results: s.results });
+      const href = pendingEnter.current ? firstHref(s.results) : null;
+      pendingEnter.current = false;
+      if (href) {
+        setOpen(false);
+        router.push(href);
+      }
+    });
+    searchRef.current(input);
+  };
 
   // Ctrl+K / Cmd+K focuses the bar from anywhere on the page.
   useEffect(() => {
@@ -39,7 +65,7 @@ export function SearchBox() {
   }, []);
 
   const position = (p: string | null) => (p && tPos.has(p) ? tPos(p) : p);
-  const results = state.status === "done" ? state.results : null;
+  const results = shown?.results ?? null;
   const players: Item[] = (results?.players ?? []).map((p) => ({
     key: `p${p.id}`,
     href: entityPath("players", p.id, p.name),
@@ -73,8 +99,11 @@ export function SearchBox() {
       if (items.length) setActive((a) => (a + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      go(items[active]);
+      const query = validQuery(text);
+      if (shown && shown.query === query) go(items[active]);
+      else if (query) pendingEnter.current = true;
     } else if (e.key === "Escape") {
+      pendingEnter.current = false;
       setOpen(false);
     }
   };
@@ -150,10 +179,14 @@ export function SearchBox() {
             setText(e.target.value);
             setActive(0);
             setOpen(true);
+            pendingEnter.current = false;
             search(e.target.value);
           }}
           onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
+          onBlur={() => {
+            pendingEnter.current = false;
+            setOpen(false);
+          }}
           onKeyDown={onKeyDown}
           className="h-full min-w-0 flex-1 bg-transparent text-body text-text outline-none placeholder:text-muted sm:text-h3"
         />
@@ -170,7 +203,7 @@ export function SearchBox() {
         className="absolute inset-x-0 top-full z-10 mt-2 max-h-[70vh] overflow-y-auto rounded-card border border-border bg-surface pb-2"
       >
         {state.status === "error" && <p className="px-4 pt-3 text-error">{t("error")}</p>}
-        {state.status === "loading" && <p className="px-4 pt-3 text-muted">{t("loading")}</p>}
+        {state.status === "loading" && items.length === 0 && <p className="px-4 pt-3 text-muted">{t("loading")}</p>}
         {state.status === "done" && items.length === 0 && (
           <p className="px-4 pt-3 text-muted">{t("empty", { query: state.query })}</p>
         )}

@@ -12,6 +12,16 @@ test("typing shows results and Enter opens the first player", async ({ page }) =
   await expect(page).toHaveURL(/\/en\/players\/278-kylian-mbappe$/);
 });
 
+test("Enter pressed before the answer opens the first result for the typed text", async ({ page }) => {
+  await page.goto("/en");
+  const box = page.getByRole("combobox");
+  await box.fill("me");
+  await expect(page.getByRole("option").first()).toBeVisible();
+  await box.fill("haaland");
+  await box.press("Enter");
+  await expect(page).toHaveURL(/\/en\/players\/1100-erling-haaland$/);
+});
+
 test("arrows move the highlight, Escape closes the list", async ({ page }) => {
   await page.goto("/en");
   const box = page.getByRole("combobox");
