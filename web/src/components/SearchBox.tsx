@@ -7,7 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { type SearchResults, validQuery } from "@/lib/api";
 import { createSearch, fetchSearch, type SearchState } from "@/lib/search-client";
-import { entityPath } from "@/lib/slug";
+import { entityPath, initials } from "@/lib/slug";
 
 type Item = { key: string; href: string; name: string; sub: string; image: string | null; round: boolean };
 type Shown = { query: string; results: SearchResults };
@@ -15,9 +15,6 @@ type Shown = { query: string; results: SearchResults };
 // Same order as the list: players first, then clubs.
 const firstHref = ({ players: [p], clubs: [c] }: SearchResults) =>
   p ? entityPath("players", p.id, p.name) : c ? entityPath("clubs", c.id, c.name) : null;
-
-const initials = (name: string) =>
-  name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
 
 export function SearchBox() {
   const t = useTranslations("Search");

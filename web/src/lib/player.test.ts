@@ -21,25 +21,28 @@ describe("ageOn", () => {
 
 describe("delta", () => {
   it("counts", () => {
-    expect(delta(25, 31)).toEqual({ text: "−6", sign: -1 });
-    expect(delta(5, 3)).toEqual({ text: "+2", sign: 1 });
-    expect(delta(4, 4)).toEqual({ text: "0", sign: 0 });
+    expect(delta(25, 31, 0, "en")).toEqual({ text: "−6", sign: -1 });
+    expect(delta(5, 3, 0, "en")).toEqual({ text: "+2", sign: 1 });
+    expect(delta(4, 4, 0, "en")).toEqual({ text: "0", sign: 0 });
+    expect(delta(3371, 2000, 0, "en")).toEqual({ text: "+1,371", sign: 1 });
   });
   it("ratings compare the shown values", () => {
-    expect(delta(7.53, 7.72, 1)).toEqual({ text: "−0.2", sign: -1 });
-    expect(delta(7.53, 7.48, 1)).toEqual({ text: "0.0", sign: 0 }); // both show 7.5
+    expect(delta(7.53, 7.72, 1, "en")).toEqual({ text: "−0.2", sign: -1 });
+    expect(delta(7.53, 7.72, 1, "fr")).toEqual({ text: "−0,2", sign: -1 });
+    expect(delta(7.53, 7.48, 1, "en")).toEqual({ text: "0.0", sign: 0 }); // both show 7.5
   });
   it("nothing to compare", () => {
-    expect(delta(7.5, null, 1)).toBeNull();
-    expect(delta(null, 7.5, 1)).toBeNull();
+    expect(delta(7.5, null, 1, "en")).toBeNull();
+    expect(delta(null, 7.5, 1, "en")).toBeNull();
   });
 });
 
 describe("ratings", () => {
-  it("always one decimal", () => {
-    expect(formatRating(7.53)).toBe("7.5");
-    expect(formatRating(8)).toBe("8.0");
-    expect(formatRating(null)).toBe("–");
+  it("always one decimal, in the page's language", () => {
+    expect(formatRating(7.53, "en")).toBe("7.5");
+    expect(formatRating(8, "en")).toBe("8.0");
+    expect(formatRating(7.53, "fr")).toBe("7,5");
+    expect(formatRating(null, "en")).toBe("–");
   });
   it.each([
     [5.9, "bad"],

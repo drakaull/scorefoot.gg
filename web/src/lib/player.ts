@@ -84,17 +84,28 @@ export function ageOn(birthDate: string | null, today: Date): number | null {
   return today.getUTCFullYear() - y - (hadBirthday ? 0 : 1);
 }
 
+/** A number with exactly `decimals` decimals, in the page's language ("2,604" / "2 604", "7.5" / "7,5"). */
+export const formatNumber = (n: number, decimals: number, locale: string) =>
+  new Intl.NumberFormat(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(n);
+
 /** Change vs the previous season, computed on the values as shown (rounded to `decimals`). Uses a real minus sign. */
-export function delta(current: number | null, previous: number | null, decimals = 0): { text: string; sign: -1 | 0 | 1 } | null {
+export function delta(
+  current: number | null,
+  previous: number | null,
+  decimals: number,
+  locale: string,
+): { text: string; sign: -1 | 0 | 1 } | null {
   if (current === null || previous === null) return null;
   const diff = Number(current.toFixed(decimals)) - Number(previous.toFixed(decimals));
-  const text = Math.abs(diff).toFixed(decimals);
-  if (Number(text) === 0) return { text, sign: 0 };
+  const size = Number(Math.abs(diff).toFixed(decimals));
+  const text = formatNumber(size, decimals, locale);
+  if (size === 0) return { text, sign: 0 };
   return diff > 0 ? { text: `+${text}`, sign: 1 } : { text: `−${text}`, sign: -1 };
 }
 
 /** Ratings always show one decimal. */
-export const formatRating = (rating: number | null) => (rating === null ? "–" : rating.toFixed(1));
+export const formatRating = (rating: number | null, locale: string) =>
+  rating === null ? "–" : formatNumber(rating, 1, locale);
 
 export type RatingBand = "bad" | "poor" | "ok" | "good" | "great";
 

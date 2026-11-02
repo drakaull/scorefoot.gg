@@ -7,10 +7,10 @@
 - [x] T5. Radar percentiles (tests first)
 - [x] T6. Detailed stats and `GET /players/{id}` ✋
 - [x] T7. Player data and formatting (tests first)
-- [ ] T8. Route, states and texts
-- [ ] T9. Header, season tabs and stat cards
-- [ ] T10. Form and radar cards
-- [ ] T11. Detailed stats and club history cards
+- [x] T8. Route, states and texts
+- [x] T9. Header, season tabs and stat cards
+- [x] T10. Form and radar cards
+- [x] T11. Detailed stats and club history cards
 - [ ] T12. End-to-end tests
 - [ ] T13. Visual check ✋
 - [ ] T14. Acceptance, docs, review ✋

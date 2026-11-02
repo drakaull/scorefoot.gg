@@ -15,3 +15,7 @@ export function slugify(name: string): string {
 /** "/players/278-kylian-mbappe": id first, so a renamed player keeps working links. */
 export const entityPath = (kind: "players" | "clubs", id: number, name: string) =>
   `/${kind}/${id}-${slugify(name)}`;
+
+/** "Kylian Mbappé" → "KM": shown when a photo is missing. */
+export const initials = (name: string) =>
+  name.split(/s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");

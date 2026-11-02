@@ -14,6 +14,12 @@
   --color-gold: #f5c451;
   --color-error: #f2555a;
   --color-ink: #0b100d; /* text on accent, gold or rating backgrounds */
+  /* Match rating scale */
+  --color-rating-bad: #f2555a; /* < 6.0 */
+  --color-rating-poor: #f5803e; /* 6.0 – 6.4 */
+  --color-rating-ok: #f5c451; /* 6.5 – 6.9 */
+  --color-rating-good: #3ddc84; /* 7.0 – 7.9 */
+  --color-rating-great: #4c9aff; /* ≥ 8.0 */
 
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
 

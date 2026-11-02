@@ -44,7 +44,7 @@ No new dependency.
 
 **T8. Route, states and texts**
 - `src/app/[locale]/players/[slug]/page.tsx`: parse id, wrong slug → permanent redirect keeping `season`, 404 rules, metadata (title and description).
-- `loading.tsx` (skeleton cards), `error.tsx` (error card with retry).
+- `error.tsx` (error card with retry). No `loading.tsx`: it would turn 404s and redirects into "200 OK".
 - `Player` namespace in `en.json` and `fr.json` (position plurals, labels, messages).
 
 **T9. Header, season tabs and stat cards**

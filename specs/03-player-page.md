@@ -107,7 +107,7 @@ Groups and rows (total and per 90; percentages have no per 90):
    - Club history: table Season, Club (logo + name, league as sub-line, truncated with "…"), Apps, Min, Goals, Assists, Rating badge. Under 640px: no Season, Min and Assists columns; the season moves into the sub-line ("25-26 · La Liga").
 
 ### States
-- Loading: `loading.tsx` with grey card skeletons of the same sizes (no layout jump).
+- Loading: no skeleton. A `loading.tsx` would make Next.js send "200 OK" before it knows the page is a 404 or a redirect; the api answers in under 100 ms, so the previous page simply stays until the new one is ready.
 - Error (api unreachable): an error card "Stats are unavailable, try again" with a retry button.
 - Empty pieces: no rated match → badges show "–"; no form match in the season → "No match played this season".
 
