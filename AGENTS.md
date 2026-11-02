@@ -14,25 +14,42 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - Follow the design system exactly. No new colours, fonts or sizes
 - Reuse existing components. One component, one job
 - Don't create unnecessary files
-- [Language and framework rules. e.g. "Use TypeScript strict mode"]
+- TypeScript in strict mode in web/. No `any` without a one-line reason
+- C# with nullable reference types enabled and warnings as errors in server/
+- web/ never queries the database or API-Football: it only calls api/
+- Only ScoreFoot.Sync calls API-Football, and it must never exceed 100 requests per day
+- Never hard-code a season or a league id: they come from configuration or the database
+- Every UI string goes through next-intl, with both en.json and fr.json filled
+- Before choosing a library version or writing code against a library, check its current docs with Context7
 
 ## 03 Code Guidelines
 - Clear, meaningful names
 - Handle loading, error and empty states
 - Every page works on mobile
-- [Project conventions]
+- Code, names, comments, commits and docs in English
+- Conventional Commits (feat, fix, docs, test, chore...)
+- Numbers in tables use tabular figures; ratings always show one decimal
+- Images (photos, logos) are always served by api/, never hotlinked
 
 ## 04 Security
 - No secrets in code: use untracked .env files
 - Validate all user input at trust boundaries
-- [Project-specific rules: auth, permissions, data handling]
+- The API-Football key is read only by ScoreFoot.Sync from .env. It never appears in web/, api/, logs or the browser
+- api/ is read-only: no endpoint writes to the database
+- No cookies, analytics or third-party requests from the browser
+- PostgreSQL port bound to 127.0.0.1 only
 
 ## 05 Useful Commands
+Planned commands, to be confirmed when the projects are scaffolded:
 ```
-[install command]
-[dev server command]
-[build command]
-[test command]
+docker compose up -d db            # start PostgreSQL
+docker compose run --rm sync       # run one sync batch (stops before the daily quota)
+dotnet run --project server/ScoreFoot.Api   # api on http://localhost:5080
+cd web && npm install && npm run dev        # web on http://localhost:3000
+dotnet test server/ScoreFoot.sln   # C# tests
+cd web && npm test                 # Vitest
+cd web && npx playwright test      # end-to-end, Chrome + Firefox
+docker compose up -d --build       # whole stack
 ```
 
 ## 06 When Unsure
