@@ -19,6 +19,8 @@ public static class Database
             Database = Require("POSTGRES_DB"),
             Username = Require("POSTGRES_USER"),
             Password = Require("POSTGRES_PASSWORD"),
+            // We use password auth; without this Npgsql probes Kerberos and logs a missing libgssapi error on Linux.
+            GssEncryptionMode = GssEncryptionMode.Disable,
         }.ConnectionString;
     }
 }
