@@ -27,5 +27,11 @@
   },
   "Footer": {
     "data": "Data: API-Football. Player photos and club logos belong to their owners."
+  },
+  "Position": {
+    "Goalkeeper": "Goalkeeper",
+    "Defender": "Defender",
+    "Midfielder": "Midfielder",
+    "Attacker": "Attacker"
   }
 }

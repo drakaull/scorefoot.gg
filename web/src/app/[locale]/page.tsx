@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { Mark } from "@/components/Mark";
+import { SearchBox } from "@/components/SearchBox";
 
 export default function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   setRequestLocale(use(params).locale);
@@ -16,6 +17,7 @@ export default function HomePage({ params }: { params: Promise<{ locale: string 
         </span>
       </h1>
       <p className="mt-2 text-muted">{t("tagline")}</p>
+      <SearchBox />
     </section>
   );
 }

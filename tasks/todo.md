@@ -7,9 +7,9 @@
 - [x] T5. `GET /media/{**path}` (tests first)
 - [x] T6. Scaffold `web/`
 - [x] T7. Languages and layout
-- [ ] T8. Home hero and search bar (static)
+- [x] T8. Home hero and search bar (static)
 - [x] T9. Server bridge to the api
-- [ ] T10. Search combobox (tests first for the logic)
+- [x] T10. Search combobox (tests first for the logic)
 - [ ] T11. Web in Docker Compose
 - [ ] T12. End-to-end tests
 - [ ] T13. Visual check ✋

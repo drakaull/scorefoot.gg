@@ -27,5 +27,11 @@
   },
   "Footer": {
     "data": "Données : API-Football. Les photos des joueurs et les logos des clubs appartiennent à leurs propriétaires."
+  },
+  "Position": {
+    "Goalkeeper": "Gardien",
+    "Defender": "Défenseur",
+    "Midfielder": "Milieu",
+    "Attacker": "Attaquant"
   }
 }
