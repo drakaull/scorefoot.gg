@@ -66,15 +66,15 @@ First visible version of ScoreFoot.gg: the home page with the big search bar (dp
 - Missing photo → initials circle (as in the mockup); missing logo → club code chip.
 
 ## Acceptance criteria
-- [ ] `docker compose up -d --build` starts `db`, `api` and `web`; the site answers on http://localhost:3000.
-- [ ] Typing `mbap` shows Kylian Mbappé first; `erling` finds Erling Haaland; `odegaard` finds Martin Ødegaard; `psg` finds Paris Saint Germain.
-- [ ] A query under 2 or over 50 characters returns `400` from the api and shows nothing in the UI.
-- [ ] `/media/../appsettings.json` and `/media/players/x.exe` return `404`.
-- [ ] Search answers in under 100 ms locally (api timing, measured on 20 queries).
-- [ ] Keyboard-only use works: `Ctrl+K`, arrows, `Enter`, `Esc`.
-- [ ] `/en` and `/fr` show every text in the right language; switching keeps the page.
-- [ ] No request to any third-party domain in the browser network tab (fonts and images are local).
-- [ ] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
+- [x] `docker compose up -d --build` starts `db`, `api` and `web`; the site answers on http://localhost:3000.
+- [x] Typing `mbap` shows Kylian Mbappé first; `erling` finds Erling Haaland; `odegaard` finds Martin Ødegaard; `psg` finds Paris Saint Germain.
+- [x] A query under 2 or over 50 characters returns `400` from the api and shows nothing in the UI.
+- [x] `/media/../appsettings.json` and `/media/players/x.exe` return `404`.
+- [x] Search answers in under 100 ms locally (api timing, measured on 20 queries).
+- [x] Keyboard-only use works: `Ctrl+K`, arrows, `Enter`, `Esc`.
+- [x] `/en` and `/fr` show every text in the right language; switching keeps the page.
+- [x] No request to any third-party domain in the browser network tab (fonts and images are local).
+- [x] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
 
 ## Tests
 - xUnit (against the test database): ranking (prefix before contains, stars before reserves), accent and case insensitivity, club code match, input validation, media path filtering.

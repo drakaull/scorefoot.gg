@@ -12,5 +12,5 @@
 - [x] T10. Search combobox (tests first for the logic)
 - [x] T11. Web in Docker Compose
 - [x] T12. End-to-end tests
-- [ ] T13. Visual check ✋
+- [x] T13. Visual check ✋ (approved 2026-11-02)
 - [ ] T14. Acceptance, docs, review ✋

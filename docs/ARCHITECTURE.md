@@ -102,9 +102,9 @@ ScoreFoot.gg/
 1. Browser requests `/en/players/{id}-{slug}` from `web`.
 2. `web` (server component) calls `api` `GET /players/{id}?season=2025`.
 3. `api` reads PostgreSQL and returns JSON; `web` renders HTML and sends it.
-4. Images load from `api` `/media/...`, never from a third-party domain.
+4. Images load from `web` `/media/...`, a route handler that streams them from `api` `/media/...`, never from a third-party domain.
 
-**Search:** the search bar calls `web`, which calls `api` `GET /search?q=mbape`; PostgreSQL ranks players and clubs with trigram similarity on unaccented names.
+**Search:** the search bar calls `web` `/api/search` (a route handler), which calls `api` `GET /search?q=mbape`; PostgreSQL ranks players and clubs with trigram word similarity on unaccented names. The `api` address (`API_URL`) is read at runtime on the server and never reaches the browser.
 
 ## 05 Data & Privacy
 - No visitor accounts, no visitor data stored, no cookies. Language is in the URL (`/en`, `/fr`).
