@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ScoreFootDbContext>(o => o
     .UseNpgsql(Database.ConnectionStringFromEnvironment())
     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
+var imagesPath = builder.Configuration["ImagesPath"] ?? "/data/images";
+
 var app = builder.Build();
 
 app.MapGet("/health", async (ScoreFootDbContext db, CancellationToken ct) =>
@@ -26,6 +28,14 @@ app.MapGet("/search", async (string? q, ScoreFootDbContext db, CancellationToken
     Search.ValidQuery(q) is { } query
         ? Results.Ok(await Search.RunAsync(db, query, ct))
         : Results.BadRequest(new { error = "q must be 2 to 50 characters long" }));
+
+app.MapGet("/media/{**path}", (string? path, HttpResponse response) =>
+{
+    if (Media.Resolve(imagesPath, path) is not { } file || !File.Exists(file)) return Results.NotFound();
+    response.Headers.CacheControl = "public, max-age=604800"; // an image never changes for a given id
+    response.Headers.XContentTypeOptions = "nosniff";
+    return TypedResults.PhysicalFile(Path.GetFullPath(file), "image/png");
+});
 
 app.Run();
 return 0;

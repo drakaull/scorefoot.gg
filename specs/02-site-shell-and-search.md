@@ -37,7 +37,7 @@ First visible version of ScoreFoot.gg: the home page with the big search bar (dp
 
 ### `GET /media/{**path}`
 - Serves files from the images volume (`/data/images`), e.g. `/media/players/278.png`.
-- Only `leagues/`, `teams/`, `players/` and `.png`/`.svg` files; anything else (including `..`) → `404`.
+- Only `leagues/`, `teams/`, `players/` and numeric `.png` file names (`players/278.png`, the only files sync writes); anything else (including `..` and `.svg`, which can carry scripts) → `404`. Header `X-Content-Type-Options: nosniff`.
 - `Cache-Control: public, max-age=604800` (images never change).
 
 ### `GET /health`

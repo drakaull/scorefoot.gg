@@ -4,7 +4,7 @@
 - [x] T2. Scaffold `ScoreFoot.Api` + `/health` + Compose service
 - [x] T3. Search query (tests first)
 - [x] T4. `GET /search` endpoint
-- [ ] T5. `GET /media/{**path}` (tests first)
+- [x] T5. `GET /media/{**path}` (tests first)
 - [ ] T6. Scaffold `web/`
 - [ ] T7. Languages and layout
 - [ ] T8. Home hero and search bar (static)
