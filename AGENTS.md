@@ -17,7 +17,7 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - TypeScript in strict mode in web/. No `any` without a one-line reason
 - C# with nullable reference types enabled and warnings as errors in server/
 - web/ never queries the database or API-Football: it only calls api/
-- Only ScoreFoot.Sync calls API-Football, and it must never exceed 100 requests per day
+- Only ScoreFoot.Sync calls API-Football, and it must never exceed the configured daily budget
 - Never hard-code a season or a league id: they come from configuration or the database
 - Every UI string goes through next-intl, with both en.json and fr.json filled
 - Before choosing a library version or writing code against a library, check its current docs with Context7

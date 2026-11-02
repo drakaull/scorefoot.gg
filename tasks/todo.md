@@ -1,6 +1,6 @@
 # Todo — Spec 01 Data sync
 
-- [ ] T1. Verify the API facts ✋
+- [x] T1. Verify the API facts ✋
 - [ ] T2. Choose and approve dependencies ✋
 - [ ] T3. Scaffold the solution
 - [ ] T4. PostgreSQL in Docker
@@ -12,4 +12,4 @@
 - [ ] T10. Image download
 - [ ] T11. `status` command
 - [ ] T12. `sync` in Docker Compose + first real run ✋
-- [ ] T13. Daily runs until complete + acceptance ✋
+- [ ] T13. Acceptance (before 2026-12-02) ✋

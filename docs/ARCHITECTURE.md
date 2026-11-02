@@ -52,16 +52,16 @@ ScoreFoot.gg/
 ```
 
 ## 04 Data Flow
-**Sync (offline, a few times per day until the 3 seasons are complete):**
-1. `sync` reads its progress from the database and checks today's remaining quota (API-Football `/status`).
+**Sync (offline, run by hand; one run downloads everything on the Pro plan):**
+1. `sync` reads its progress from the database and counts today's calls from its own log.
 2. It fetches the next batch (leagues, teams, players per page, fixtures, per-match player stats) and upserts it into PostgreSQL.
 3. It downloads new player photos and club logos into the images volume.
-4. It stops before reaching 100 requests and resumes the next day where it left off.
+4. It stops at the configured daily budget and resumes on the next run where it left off.
 5. Derived values (percentiles per position, season aggregates) are recomputed in the database after an import.
 
 **A visitor opens a player page:**
 1. Browser requests `/en/players/{id}-{slug}` from `web`.
-2. `web` (server component) calls `api` `GET /players/{id}?season=2024`.
+2. `web` (server component) calls `api` `GET /players/{id}?season=2025`.
 3. `api` reads PostgreSQL and returns JSON; `web` renders HTML and sends it.
 4. Images load from `api` `/media/...`, never from a third-party domain.
 
