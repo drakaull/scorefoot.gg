@@ -1,9 +1,9 @@
 # Todo — Spec 01 Data sync
 
 - [x] T1. Verify the API facts ✋
-- [ ] T2. Choose and approve dependencies ✋
-- [ ] T3. Scaffold the solution
-- [ ] T4. PostgreSQL in Docker
+- [x] T2. Choose and approve dependencies ✋
+- [x] T3. Scaffold the solution
+- [x] T4. PostgreSQL in Docker
 - [ ] T5. Entities and first migration
 - [ ] T6. API client and budget guard
 - [ ] T7. Task planner
