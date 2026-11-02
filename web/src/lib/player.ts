@@ -1,0 +1,110 @@
+import { apiUrl } from "./api";
+
+// Shapes of the api's GET /players/{id} answer (ScoreFoot.Api/PlayerPage.cs).
+export type ClubRef = { id: number; name: string; logo: string | null };
+export type SeasonClub = ClubRef & { league: string };
+export type Summary = { appearances: number; minutes: number; goals: number; assists: number; rating: number | null };
+export type FormMatch = {
+  fixtureId: number;
+  kickoffUtc: string;
+  opponent: ClubRef & { code: string | null };
+  home: boolean;
+  goalsFor: number | null;
+  goalsAgainst: number | null;
+  minutes: number;
+  rating: number | null;
+  goals: number;
+  assists: number;
+};
+export type RadarAxis = { key: string; value: number | null; percentile: number | null };
+export type Radar = { minMinutes: number; eligible: boolean; groupSize: number; axes: RadarAxis[] };
+export type StatRow = { key: string; total: number | null; per90: number | null; outOf: number | null; pct: number | null };
+export type StatGroup = { group: string; rows: StatRow[] };
+export type HistoryRow = {
+  season: number;
+  club: ClubRef;
+  league: string;
+  appearances: number;
+  minutes: number;
+  goals: number;
+  assists: number;
+  rating: number | null;
+};
+export type Player = {
+  id: number;
+  name: string;
+  photo: string | null;
+  birthDate: string | null;
+  nationality: string | null;
+  heightCm: number | null;
+  seasons: number[];
+  season: number;
+  position: string | null;
+  clubs: SeasonClub[];
+  summary: Summary;
+  previous: Summary | null;
+  form: FormMatch[];
+  radar: Radar;
+  stats: StatGroup[];
+  history: HistoryRow[];
+};
+
+/** Server side only. Null when the api has no such page (404); throws when the api fails. */
+export async function fetchPlayer(id: number, season: number | undefined): Promise<Player | null> {
+  const query = season === undefined ? "" : `?season=${season}`;
+  const res = await fetch(`${apiUrl()}/players/${id}${query}`, { cache: "no-store", signal: AbortSignal.timeout(5000) });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`player ${id}: api answered ${res.status}`);
+  return res.json();
+}
+
+/** "278-kylian-mbappe" → 278. The slug part is decorative. */
+export function parseId(slug: string): number | null {
+  const match = /^([0-9]{1,10})(-.*)?$/.exec(slug);
+  return match?.[1] ? Number(match[1]) : null;
+}
+
+/** `?season=` as given in the URL: undefined when absent, "invalid" when it is not a 4-digit year. */
+export function parseSeason(raw: string | readonly string[] | undefined): number | undefined | "invalid" {
+  if (raw === undefined) return undefined;
+  return typeof raw === "string" && /^[0-9]{4}$/.test(raw) ? Number(raw) : "invalid";
+}
+
+/** 2024 → "2024-25" (long) or "24-25" (short). */
+export function seasonLabel(season: number, form: "long" | "short" = "long"): string {
+  const next = String((season + 1) % 100).padStart(2, "0");
+  return form === "long" ? `${season}-${next}` : `${String(season % 100).padStart(2, "0")}-${next}`;
+}
+
+/** Age in full years on `today`, from an ISO date ("1998-12-20"). */
+export function ageOn(birthDate: string | null, today: Date): number | null {
+  if (!birthDate) return null;
+  const [y = 0, m = 1, d = 1] = birthDate.split("-").map(Number);
+  const hadBirthday = today.getUTCMonth() + 1 > m || (today.getUTCMonth() + 1 === m && today.getUTCDate() >= d);
+  return today.getUTCFullYear() - y - (hadBirthday ? 0 : 1);
+}
+
+/** Change vs the previous season, computed on the values as shown (rounded to `decimals`). Uses a real minus sign. */
+export function delta(current: number | null, previous: number | null, decimals = 0): { text: string; sign: -1 | 0 | 1 } | null {
+  if (current === null || previous === null) return null;
+  const diff = Number(current.toFixed(decimals)) - Number(previous.toFixed(decimals));
+  const text = Math.abs(diff).toFixed(decimals);
+  if (Number(text) === 0) return { text, sign: 0 };
+  return diff > 0 ? { text: `+${text}`, sign: 1 } : { text: `−${text}`, sign: -1 };
+}
+
+/** Ratings always show one decimal. */
+export const formatRating = (rating: number | null) => (rating === null ? "–" : rating.toFixed(1));
+
+export type RatingBand = "bad" | "poor" | "ok" | "good" | "great";
+
+/** Colour band of the rating scale in docs/DESIGN_SYSTEM.md, on the value as shown. */
+export function ratingBand(rating: number | null): RatingBand | null {
+  if (rating === null) return null;
+  const shown = Number(rating.toFixed(1));
+  if (shown < 6) return "bad";
+  if (shown < 6.5) return "poor";
+  if (shown < 7) return "ok";
+  if (shown < 8) return "good";
+  return "great";
+}
