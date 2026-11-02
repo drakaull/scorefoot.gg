@@ -1,0 +1,1 @@
+Console.WriteLine("ScoreFoot.Sync");

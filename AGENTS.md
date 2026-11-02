@@ -44,9 +44,9 @@ Planned commands, to be confirmed when the projects are scaffolded:
 ```
 docker compose up -d db            # start PostgreSQL
 docker compose run --rm sync       # run one sync batch (stops before the daily quota)
-dotnet run --project server/ScoreFoot.Api   # api on http://localhost:5080
+cd server && dotnet run --project ScoreFoot.Api   # api on http://localhost:5080 (run .NET commands from server/ so global.json applies)
 cd web && npm install && npm run dev        # web on http://localhost:3000
-dotnet test server/ScoreFoot.sln   # C# tests
+cd server && dotnet test --solution ScoreFoot.sln   # C# tests
 cd web && npm test                 # Vitest
 cd web && npx playwright test      # end-to-end, Chrome + Firefox
 docker compose up -d --build       # whole stack
