@@ -81,13 +81,13 @@ Prints, without calling the API: requests used today / budget, tasks done / tota
 - `run --retry-failed` puts failed tasks back to pending.
 
 ## Acceptance criteria
-- [ ] `docker compose up -d db` starts PostgreSQL 18, reachable only on 127.0.0.1.
-- [ ] `docker compose run --rm sync run` never makes more than the daily budget, even when run twice the same day.
-- [ ] Killing the run mid-way and restarting it loses nothing and duplicates nothing.
-- [ ] After the 4 seasons are synced: 5 leagues × 4 seasons of teams, standings and finished fixtures exist; every finished fixture has player stats; each league-season has at least 450 players.
-- [ ] Every team has a logo file and at least 95% of players have a photo file in the images volume.
-- [ ] The API key never appears in logs, the database or git.
-- [ ] `status` shows progress without spending quota.
+- [x] `docker compose up -d db` starts PostgreSQL 18, reachable only on 127.0.0.1.
+- [x] `docker compose run --rm sync run` never makes more than the daily budget, even when run twice the same day.
+- [x] Killing the run mid-way and restarting it loses nothing and duplicates nothing.
+- [x] After the 4 seasons are synced: 5 leagues × 4 seasons of teams, standings and finished fixtures exist; every finished fixture has player stats; each league-season has at least 450 players.
+- [x] Every team has a logo file and at least 95% of players have a photo file in the images volume.
+- [x] The API key never appears in logs, the database or git.
+- [x] `status` shows progress without spending quota.
 
 ## Tests (xUnit)
 - Budget guard: with the budget already used today, no call is made.
