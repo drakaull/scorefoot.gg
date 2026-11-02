@@ -1,6 +1,6 @@
 # Todo — Spec 03 Player page
 
-- [ ] T1. "Forward" → "Attacker" at import, then reimport
+- [x] T1. "Forward" → "Attacker" at import, then reimport
 - [ ] T2. Search leaves out players who never played
 - [ ] T3. Player profile and seasons (tests first)
 - [ ] T4. Last 5 matches (tests first)
