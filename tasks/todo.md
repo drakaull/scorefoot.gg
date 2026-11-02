@@ -11,6 +11,6 @@
 - [x] T9. Server bridge to the api
 - [x] T10. Search combobox (tests first for the logic)
 - [ ] T11. Web in Docker Compose
-- [ ] T12. End-to-end tests
+- [x] T12. End-to-end tests
 - [ ] T13. Visual check ✋
 - [ ] T14. Acceptance, docs, review ✋
