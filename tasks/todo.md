@@ -11,6 +11,6 @@
 - [x] T9. Header, season tabs and stat cards
 - [x] T10. Form and radar cards
 - [x] T11. Detailed stats and club history cards
-- [ ] T12. End-to-end tests
+- [x] T12. End-to-end tests
 - [ ] T13. Visual check ✋
 - [ ] T14. Acceptance, docs, review ✋
