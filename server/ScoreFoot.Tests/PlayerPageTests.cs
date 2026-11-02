@@ -51,6 +51,8 @@ public class PlayerPageTests
         Assert.Equal(new Summary(20, 1200, 2, 2, 7.25m), page.Summary);
         Assert.Equal(["Paris Saint Germain", "Lille"], page.Clubs.Select(c => c.Name));
         Assert.Equal(new SeasonClub(85, "Paris Saint Germain", "/media/teams/85.png", "Ligue 1"), page.Clubs[0]);
+        // 1,200 minutes over two clubs: in the radar group, alone (player 2 never played).
+        Assert.Equal((true, 1), (page.Radar.Eligible, page.Radar.GroupSize));
     }
 
     [Fact]

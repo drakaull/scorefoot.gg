@@ -4,7 +4,7 @@
 - [x] T2. Search leaves out players who never played
 - [x] T3. Player profile and seasons (tests first)
 - [x] T4. Last 5 matches (tests first)
-- [ ] T5. Radar percentiles (tests first)
+- [x] T5. Radar percentiles (tests first)
 - [ ] T6. Detailed stats and `GET /players/{id}` ✋
 - [ ] T7. Player data and formatting (tests first)
 - [ ] T8. Route, states and texts

@@ -18,7 +18,7 @@ public sealed record HistoryRow(int Season, ClubRef Club, string League, int App
 public sealed record PlayerPage(
     int Id, string Name, string? Photo, DateOnly? BirthDate, string? Nationality, int? HeightCm,
     IReadOnlyList<int> Seasons, int Season, string? Position, IReadOnlyList<SeasonClub> Clubs,
-    Summary Summary, Summary? Previous, IReadOnlyList<FormMatch> Form, IReadOnlyList<HistoryRow> History)
+    Summary Summary, Summary? Previous, IReadOnlyList<FormMatch> Form, RadarResult Radar, IReadOnlyList<HistoryRow> History)
 {
     public const int FormSize = 5;
 
@@ -55,13 +55,30 @@ public sealed record PlayerPage(
                 s.Minutes ?? 0, s.Rating, s.Goals ?? 0, s.Assists ?? 0);
         }).ToList();
 
+        var position = current[0].Position;
+        var radar = Api.Radar.Build(position, SeasonTotals.From(current), await RadarGroupAsync(db, chosen, position, ct));
+
         return new PlayerPage(
             player.Id, player.Name, Media(player.PhotoPath), player.BirthDate, player.Nationality, player.HeightCm,
-            seasons, chosen, current[0].Position,
+            seasons, chosen, position,
             current.Select(l => new SeasonClub(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), l.League.Name)).ToList(),
-            Summarize(current), previous.Count > 0 ? Summarize(previous) : null, form,
+            Summarize(current), previous.Count > 0 ? Summarize(previous) : null, form, radar,
             lines.Select(l => new HistoryRow(l.Season, new ClubRef(l.TeamId, l.Team.Name, Media(l.Team.LogoPath)), l.League.Name,
                 l.Appearances ?? 0, l.Minutes ?? 0, l.Goals ?? 0, l.Assists ?? 0, l.Rating)).ToList());
+    }
+
+    /// <summary>
+    /// Season totals of every player whose main position (most minutes) is <paramref name="position"/> and who played
+    /// at least <see cref="Radar.MinMinutes"/> minutes. About 4,500 played lines per season, added up in memory.
+    /// </summary>
+    private static async Task<List<SeasonTotals>> RadarGroupAsync(ScoreFootDbContext db, int season, string? position, CancellationToken ct)
+    {
+        if (position is null) return [];
+        var lines = await db.PlayerSeasonStats.AsNoTracking().Where(s => s.Season == season && s.Minutes > 0).ToListAsync(ct);
+        return lines.GroupBy(l => l.PlayerId)
+            .Where(g => g.MaxBy(l => l.Minutes)!.Position == position && g.Sum(l => l.Minutes) >= Api.Radar.MinMinutes)
+            .Select(g => SeasonTotals.From(g.ToList()))
+            .ToList();
     }
 
     private static Summary Summarize(IReadOnlyList<PlayerSeasonStat> lines) => new(
