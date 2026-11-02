@@ -13,4 +13,4 @@
 - [x] T11. Detailed stats and club history cards
 - [x] T12. End-to-end tests
 - [x] T13. Visual check ✋
-- [ ] T14. Acceptance, docs, review ✋
+- [x] T14. Acceptance, docs, review ✋
