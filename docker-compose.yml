@@ -38,6 +38,18 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # The website. The browser only talks to this service; it calls the api on the internal network.
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:8080
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
   # One-off job, not started by "docker compose up": docker compose run --rm sync run | status
   sync:
     build:

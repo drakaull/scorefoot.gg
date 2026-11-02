@@ -10,7 +10,7 @@
 - [x] T8. Home hero and search bar (static)
 - [x] T9. Server bridge to the api
 - [x] T10. Search combobox (tests first for the logic)
-- [ ] T11. Web in Docker Compose
+- [x] T11. Web in Docker Compose
 - [x] T12. End-to-end tests
 - [ ] T13. Visual check ✋
 - [ ] T14. Acceptance, docs, review ✋
