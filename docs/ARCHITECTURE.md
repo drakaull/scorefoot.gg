@@ -26,7 +26,7 @@ Major versions below; the exact patch version is pinned at install time and must
 | Backend    | ASP.NET Core 10 (LTS) Minimal API, C# |
 | Data access| Entity Framework Core 10 + Npgsql |
 | Sync       | .NET 10 console app, run by hand or on a schedule |
-| Database   | PostgreSQL 18 with `pg_trgm` and `unaccent` extensions (fuzzy, accent-insensitive search) |
+| Database   | PostgreSQL 18 with the `pg_trgm` extension (fuzzy search) on a lower-case, accent-free name column computed in C# (`SearchText.Normalize`), so `unaccent` is not needed |
 | Charts     | Hand-written SVG (radar, form bars), no chart library |
 | Auth       | None in v1 |
 | Email      | None |

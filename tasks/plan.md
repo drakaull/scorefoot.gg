@@ -22,7 +22,7 @@ Each task: build, test, verify, commit. ✋ = checkpoint where Léonard validate
 
 ## Phase 2 — Data model
 **T5. Entities and first migration**
-- All tables from the spec, unique keys on api ids, `pg_trgm` and `unaccent` extensions.
+- All tables from the spec, unique keys on api ids, `pg_trgm` extension and trigram indexes on normalized names.
 - Done when: migration applies on an empty database; tables listed with `\dt`.
 
 ## Phase 3 — Sync engine (tests first)

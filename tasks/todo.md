@@ -4,7 +4,7 @@
 - [x] T2. Choose and approve dependencies ✋
 - [x] T3. Scaffold the solution
 - [x] T4. PostgreSQL in Docker
-- [ ] T5. Entities and first migration
+- [x] T5. Entities and first migration
 - [ ] T6. API client and budget guard
 - [ ] T7. Task planner
 - [ ] T8. Parsers and upserts
