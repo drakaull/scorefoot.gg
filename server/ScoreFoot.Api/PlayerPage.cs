@@ -18,7 +18,8 @@ public sealed record HistoryRow(int Season, ClubRef Club, string League, int App
 public sealed record PlayerPage(
     int Id, string Name, string? Photo, DateOnly? BirthDate, string? Nationality, int? HeightCm,
     IReadOnlyList<int> Seasons, int Season, string? Position, IReadOnlyList<SeasonClub> Clubs,
-    Summary Summary, Summary? Previous, IReadOnlyList<FormMatch> Form, RadarResult Radar, IReadOnlyList<HistoryRow> History)
+    Summary Summary, Summary? Previous, IReadOnlyList<FormMatch> Form, RadarResult Radar,
+    IReadOnlyList<StatGroup> Stats, IReadOnlyList<HistoryRow> History)
 {
     public const int FormSize = 5;
 
@@ -56,13 +57,14 @@ public sealed record PlayerPage(
         }).ToList();
 
         var position = current[0].Position;
-        var radar = Api.Radar.Build(position, SeasonTotals.From(current), await RadarGroupAsync(db, chosen, position, ct));
+        var totals = SeasonTotals.From(current);
+        var radar = Api.Radar.Build(position, totals, await RadarGroupAsync(db, chosen, position, ct));
 
         return new PlayerPage(
             player.Id, player.Name, Media(player.PhotoPath), player.BirthDate, player.Nationality, player.HeightCm,
             seasons, chosen, position,
             current.Select(l => new SeasonClub(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), l.League.Name)).ToList(),
-            Summarize(current), previous.Count > 0 ? Summarize(previous) : null, form, radar,
+            Summarize(totals), previous.Count > 0 ? Summarize(previous) : null, form, radar, StatGroups.Build(position, totals),
             lines.Select(l => new HistoryRow(l.Season, new ClubRef(l.TeamId, l.Team.Name, Media(l.Team.LogoPath)), l.League.Name,
                 l.Appearances ?? 0, l.Minutes ?? 0, l.Goals ?? 0, l.Assists ?? 0, l.Rating)).ToList());
     }
@@ -81,9 +83,9 @@ public sealed record PlayerPage(
             .ToList();
     }
 
-    private static Summary Summarize(IReadOnlyList<PlayerSeasonStat> lines) => new(
-        lines.Sum(l => l.Appearances ?? 0), lines.Sum(l => l.Minutes ?? 0),
-        lines.Sum(l => l.Goals ?? 0), lines.Sum(l => l.Assists ?? 0), WeightedRating(lines));
+    private static Summary Summarize(IReadOnlyList<PlayerSeasonStat> lines) => Summarize(SeasonTotals.From(lines));
+
+    private static Summary Summarize(SeasonTotals t) => new(t.Appearances, t.Minutes, t.Goals, t.Assists, t.Rating);
 
     /// <summary>Ratings weighted by minutes, lines without a rating left out; null when no line has one.</summary>
     internal static decimal? WeightedRating(IEnumerable<StatLine> lines)
