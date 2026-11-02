@@ -5,10 +5,10 @@
 - [x] T3. Scaffold the solution
 - [x] T4. PostgreSQL in Docker
 - [x] T5. Entities and first migration
-- [ ] T6. API client and budget guard
-- [ ] T7. Task planner
-- [ ] T8. Parsers and upserts
-- [ ] T9. `run` command and error handling
+- [x] T6. API client and budget guard
+- [x] T7. Task planner
+- [x] T8. Parsers and upserts
+- [x] T9. `run` command and error handling
 - [ ] T10. Image download
 - [ ] T11. `status` command
 - [ ] T12. `sync` in Docker Compose + first real run ✋

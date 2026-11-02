@@ -50,6 +50,7 @@ public abstract class StatLine
     public int? ShotsOnTarget { get; set; }
     public int? PassesTotal { get; set; }
     public int? PassesKey { get; set; }
+    /// <summary>As the API gives it: a percentage in season stats, a count of accurate passes in match stats.</summary>
     public int? PassAccuracy { get; set; }
     public int? Tackles { get; set; }
     public int? Blocks { get; set; }
