@@ -1,10 +1,9 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/Card";
+import { ClubName } from "@/components/ClubName";
 import { RatingBadge } from "@/components/RatingBadge";
-import { Link } from "@/i18n/navigation";
 import { formatNumber, seasonLabel, type HistoryRow } from "@/lib/player";
-import { entityPath } from "@/lib/slug";
 
 // Tight columns so the club name keeps room; first and last columns line up with the card padding.
 const cell = "px-2 first:pl-4 last:pr-4 sm:first:pl-5 sm:last:pr-5";
@@ -45,12 +44,7 @@ export function HistoryCard({ history }: { history: HistoryRow[] }) {
                     <span aria-hidden="true" className="size-7 shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <Link
-                      href={entityPath("clubs", h.club.id, h.club.name)}
-                      className="block truncate leading-tight font-semibold hover:text-accent"
-                    >
-                      {h.club.name}
-                    </Link>
+                    <ClubName club={h.club} className="block truncate leading-tight font-semibold" />
                     <p className="truncate text-caption text-muted">
                       <span className="sm:hidden">{seasonLabel(h.season, "short")} · </span>
                       {h.league}

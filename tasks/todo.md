@@ -7,9 +7,9 @@
 - [x] T5. Key players and squad (tests first)
 - [x] T6. `GET /clubs/{id}` ✋
 - [x] T7. Club data and formatting (tests first)
-- [ ] T8. Route, states and texts
-- [ ] T9. Header, stat cards, form and key players
-- [ ] T10. League table, results and squad
+- [x] T8. Route, states and texts
+- [x] T9. Header, stat cards, form and key players
+- [x] T10. League table, results and squad
 - [ ] T11. End-to-end tests
 - [ ] T12. Visual check ✋
 - [ ] T13. Acceptance, docs, review ✋
