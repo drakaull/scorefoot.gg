@@ -1,6 +1,6 @@
 # Todo — Spec 06 Compare
 
-- [ ] T1. `radarPosition` on `GET /players/{id}` (tests first) ✋
+- [x] T1. `radarPosition` on `GET /players/{id}` (tests first) ✋
 - [ ] T2. Compare helpers (tests first)
 - [ ] T3. Compare page
 - [ ] T4. Entry points and header

@@ -27,6 +27,9 @@ public static class Radar
                           new("goalsConceded", t => t.Per90(t.GoalsConceded), LowerIsBetter: true), PassAccuracy, Rating],
     };
 
+    public static bool HasAxes(string position) => AxesByPosition.ContainsKey(position);
+
+
     /// <param name="group">Every player of the same position and season with at least <see cref="MinMinutes"/> minutes.</param>
     public static RadarResult Build(string? position, SeasonTotals player, IReadOnlyList<SeasonTotals> group)
     {

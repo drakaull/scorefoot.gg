@@ -134,6 +134,32 @@ public class PlayerPageTests
         Assert.Equal("Attacker", page.Position); // still from the line with the most minutes
     }
 
+    [Fact]
+    public async Task Radar_position_ranks_against_another_position()
+    {
+        using var db = Seed();
+        db.Players.Add(new Player { Id = 3, Name = "Centre Back", NameSearch = "centre back" });
+        db.PlayerSeasonStats.Add(new PlayerSeasonStat
+        {
+            PlayerId = 3, TeamId = 85, LeagueId = 61, Season = 2025, Position = "Defender", Minutes = 1000,
+            Tackles = 40, Interceptions = 20, Blocks = 5, DuelsTotal = 100, DuelsWon = 60, Rating = 7.0m,
+        });
+        await db.SaveChangesAsync(Ct);
+
+        // The attacker is ranked on defender axes, added to the defenders group for that.
+        var page = (await PlayerPage.LoadAsync(db, 1, null, Ct, radarPosition: "Defender"))!;
+        Assert.Equal("Attacker", page.Position);
+        Assert.Equal((true, 2), (page.Radar.Eligible, page.Radar.GroupSize));
+        Assert.Equal(["tackles", "interceptions", "blocks", "duelsWonPct", "passAccuracy", "rating"], page.Radar.Axes.Select(a => a.Key));
+        Assert.All(page.Radar.Axes.Where(a => a.Percentile is not null), a => Assert.InRange(a.Percentile!.Value, 0, 100));
+        Assert.Equal(0, page.Radar.Axes[0].Percentile); // 0 tackles against 40
+
+        // A member of the group is not counted twice.
+        Assert.Equal(1, (await PlayerPage.LoadAsync(db, 3, null, Ct, radarPosition: "Defender"))!.Radar.GroupSize);
+        Assert.True(PlayerPage.IsRadarPosition("Defender"));
+        Assert.False(PlayerPage.IsRadarPosition("Winger"));
+    }
+
     [Theory]
     [InlineData(999, null)]  // unknown player
     [InlineData(2, null)]    // never played
