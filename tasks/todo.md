@@ -10,6 +10,6 @@
 - [x] T8. Route, states and texts
 - [x] T9. Header, stat cards, form and key players
 - [x] T10. League table, results and squad
-- [ ] T11. End-to-end tests
+- [x] T11. End-to-end tests
 - [ ] T12. Visual check ✋
 - [ ] T13. Acceptance, docs, review ✋
