@@ -35,6 +35,14 @@ app.MapGet("/players/{id:int}", async (int id, int? season, ScoreFootDbContext d
 app.MapGet("/clubs/{id:int}", async (int id, int? season, ScoreFootDbContext db, CancellationToken ct) =>
     await ClubPage.LoadAsync(db, id, season, ct) is { } page ? Results.Ok(page) : Results.NotFound());
 
+app.MapGet("/leaderboards/{stat}", async (string stat, int? season, int? league, string? position, string? age, string? mode,
+    ScoreFootDbContext db, CancellationToken ct) =>
+{
+    if (!Leaderboard.IsStat(stat)) return Results.NotFound();
+    var (result, error) = await Leaderboard.RunAsync(db, new LeaderboardQuery(stat, season, league, position, age, mode), ct);
+    return result is not null ? Results.Ok(result) : Results.BadRequest(new { error });
+});
+
 app.MapGet("/media/{**path}", (string? path, HttpResponse response) =>
 {
     if (Media.Resolve(imagesPath, path) is not { } file || !File.Exists(file)) return Results.NotFound();
