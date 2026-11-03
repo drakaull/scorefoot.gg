@@ -46,7 +46,7 @@ Ratings are shown as a badge: rating colour background, `#0B100D` text, one deci
 - **H2:** 22px, 700
 - **H3:** 17px, 600
 - **Body:** 15px, 400
-- **Stat number (big):** 36px, 700
+- **Stat number (big):** 36px, 700 (mobile 26px, so "6-11-21" fits half the screen)
 - **Caption / table header:** 12px, 600, uppercase, letter-spacing 0.04em, Muted
 
 ## 04 Spacing

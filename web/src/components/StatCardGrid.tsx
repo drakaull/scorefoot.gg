@@ -20,7 +20,7 @@ export function StatCardGrid({ cards }: { cards: StatCardData[] }) {
       {cards.map((card) => (
         <Card key={card.label} className="px-4 py-3 sm:px-5 sm:py-4">
           <p className="text-caption font-semibold tracking-[0.04em] text-muted uppercase">{card.label}</p>
-          <p className={`text-stat leading-tight font-bold tabular-nums ${card.colour ?? ""}`}>{card.value}</p>
+          <p className={`text-h1-mobile leading-tight font-bold whitespace-nowrap tabular-nums sm:text-stat ${card.colour ?? ""}`}>{card.value}</p>
           {card.change && <p className={`text-caption ${DELTA_COLOUR[card.change.sign]}`}>{card.change.text}</p>}
           {card.sub && <p className="text-caption text-muted">{card.sub}</p>}
         </Card>
