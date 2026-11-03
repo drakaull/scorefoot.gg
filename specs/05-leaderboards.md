@@ -88,16 +88,16 @@ Response (example values, goals 2025-26, all filters off):
 - New namespace `Leaderboards` (stat names, page titles, filter labels and options, podium, empty state, home cards) in `en.json` and `fr.json`. League names stay as the API gives them.
 
 ## Acceptance criteria
-- [ ] `/en/leaderboards/goals` (2025-26, all filters off): Kane 36, Haaland 27, Mbappé 25 on the podium; Semenyo shown at Manchester City.
-- [ ] `rating`: Lamine Yamal first (7.95 → "8.0"), every row has 900+ minutes.
-- [ ] `?league=39` (Premier League) shows only Premier League lines; `?position=Goalkeeper` on `saves` lists only goalkeepers; `?age=u21` on `rating` keeps Yamal (born 2007).
-- [ ] `?mode=per90` re-ranks with 900+ minutes; the switch is hidden on `rating` and `minutes`.
-- [ ] Changing a filter updates the URL and the table; with JavaScript off the Apply button does the same.
-- [ ] `/en/leaderboards` redirects to `/en/leaderboards/goals`; `/en/leaderboards/xyz` and `?season=1990` show the 404 page.
-- [ ] Home shows the 3 preview cards with the same figures as the leaderboards; header link works on desktop and mobile.
-- [ ] The api answers in under 200 ms locally for 20 filter combinations; pages load in under 1 s.
-- [ ] `/en` and `/fr` show every label in the right language; no request to a third-party domain.
-- [ ] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
+- [x] `/en/leaderboards/goals` (2025-26, all filters off): Kane 36, Haaland 27, Mbappé 25 on the podium; Semenyo shown at Manchester City.
+- [x] `rating`: Lamine Yamal first (7.95 → "8.0"), every row has 900+ minutes.
+- [x] `?league=39` (Premier League) shows only Premier League lines; `?position=Goalkeeper` on `saves` lists only goalkeepers; `?age=u21` on `rating` keeps Yamal (born 2007).
+- [x] `?mode=per90` re-ranks with 900+ minutes; the switch is hidden on `rating` and `minutes`.
+- [x] Changing a filter updates the URL and the table; with JavaScript off the Apply button does the same.
+- [x] `/en/leaderboards` redirects to `/en/leaderboards/goals`; `/en/leaderboards/xyz` and `?season=1990` show the 404 page.
+- [x] Home shows the 3 preview cards with the same figures as the leaderboards; header link works on desktop and mobile.
+- [x] The api answers in under 200 ms locally for 20 filter combinations; pages load in under 1 s.
+- [x] `/en` and `/fr` show every label in the right language; no request to a third-party domain.
+- [x] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
 
 ## Tests
 - xUnit (test database): adding-up across clubs, league filter, position from the most-minutes line, age on 1 July (birthday on 30 June / 1 July / 2 July), u21 / u23, missing birth date left out, 900-minute rule for rating and per 90, ties by minutes then name, 50-row limit, last club shown, every invalid parameter → error, `mode=per90` refused for rating and minutes.

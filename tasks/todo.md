@@ -6,5 +6,5 @@
 - [x] T4. Leaderboard page
 - [x] T5. Home preview cards and header link
 - [x] T6. End-to-end tests
-- [ ] T7. Visual check ✋
+- [x] T7. Visual check ✋
 - [ ] T8. Acceptance, docs, review ✋
