@@ -32,6 +32,9 @@ app.MapGet("/search", async (string? q, ScoreFootDbContext db, CancellationToken
 app.MapGet("/players/{id:int}", async (int id, int? season, ScoreFootDbContext db, CancellationToken ct) =>
     await PlayerPage.LoadAsync(db, id, season, ct) is { } page ? Results.Ok(page) : Results.NotFound());
 
+app.MapGet("/clubs/{id:int}", async (int id, int? season, ScoreFootDbContext db, CancellationToken ct) =>
+    await ClubPage.LoadAsync(db, id, season, ct) is { } page ? Results.Ok(page) : Results.NotFound());
+
 app.MapGet("/media/{**path}", (string? path, HttpResponse response) =>
 {
     if (Media.Resolve(imagesPath, path) is not { } file || !File.Exists(file)) return Results.NotFound();
