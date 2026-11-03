@@ -53,7 +53,7 @@ public static class Search
               ORDER BY st."TeamId", st."Season" DESC)
             SELECT t."Id", t."Name", t."LogoPath", l."Name" AS "League", t."Country"
             FROM "Teams" t
-            LEFT JOIN latest ls ON ls."TeamId" = t."Id"
+            JOIN latest ls ON ls."TeamId" = t."Id" -- clubs without a standing (U21, lower divisions) are left out
             LEFT JOIN "Leagues" l ON l."Id" = ls."LeagueId"
             WHERE t."NameSearch" LIKE '%' || {like} || '%' OR {q} <% t."NameSearch" OR lower(t."Code") = {q}
             ORDER BY CASE WHEN lower(t."Code") = {q} OR t."NameSearch" LIKE {like} || '%' THEN 0

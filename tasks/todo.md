@@ -1,6 +1,6 @@
 # Todo — Spec 04 Club page
 
-- [ ] T1. Clubs without a standing leave search; player answers get `hasPage`
+- [x] T1. Clubs without a standing leave search; player answers get `hasPage`
 - [ ] T2. Zones (tests first)
 - [ ] T3. Club profile, standing, table (tests first)
 - [ ] T4. Form and results (tests first)
