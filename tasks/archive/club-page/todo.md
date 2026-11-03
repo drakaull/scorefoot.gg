@@ -12,4 +12,4 @@
 - [x] T10. League table, results and squad
 - [x] T11. End-to-end tests
 - [x] T12. Visual check ✋
-- [ ] T13. Acceptance, docs, review ✋
+- [x] T13. Acceptance, docs, review ✋
