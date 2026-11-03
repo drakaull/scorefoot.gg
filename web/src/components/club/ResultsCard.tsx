@@ -23,7 +23,8 @@ export function ResultsCard({ results }: { results: ClubMatch[] }) {
             <tr key={m.fixtureId} className="hover:bg-raised">
               <td className={`${td} leading-tight whitespace-nowrap`}>
                 {date.format(new Date(m.kickoffUtc))}
-                <span className="block text-caption text-muted">{day === null ? m.round : t("matchday", { n: day })}</span>
+                <span className="block text-caption text-muted">{/* Other rounds are relegation play-offs and deciders. */}
+                {day === null ? t("playoff") : t("matchday", { n: day })}</span>
               </td>
               <td className={`${td} w-full max-w-0`}>
                 <div className="flex min-w-0 items-center gap-2">

@@ -165,6 +165,7 @@
     },
     "results": "Season results",
     "matchday": "MD {n}",
+    "playoff": "Play-off",
     "showAll": "Show all {count} matches",
     "squad": "Squad · {count} players used",
     "player": "Player",

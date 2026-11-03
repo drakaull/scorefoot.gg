@@ -165,6 +165,7 @@
     },
     "results": "Résultats de la saison",
     "matchday": "J{n}",
+    "playoff": "Barrage",
     "showAll": "Voir les {count} matchs",
     "squad": "Effectif · {count} joueurs utilisés",
     "player": "Joueur",

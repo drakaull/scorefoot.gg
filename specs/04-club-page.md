@@ -87,7 +87,7 @@ Response (example values, Real Madrid 2025-26):
    - "Key players": 4 rows (photo, label, name linking to the player, value; rating as a Rating badge).
 4. **Two cards side by side:**
    - League table "La Liga 2025-26": rank with the zone bar, club (logo + name, link), P, W, D, L, GD, Pts. The club's row on Surface raised with its name in Accent. Legend of the zones present, under the table. Under 640px: only rank, club, GD and Pts.
-   - "Season results": date and matchday ("MD 38"; other rounds as the API names them), opponent, score, W/D/L chip. First 10, then the rest inside a native `<details>` "Show all 38 matches" (works without JavaScript).
+   - "Season results": date and matchday ("MD 38"; the other rounds, relegation play-offs and the 2022 Serie A decider, show "Play-off" / "Barrage" and stay in the list), opponent, score, W/D/L chip. First 10, then the rest inside a native `<details>` "Show all 38 matches" (works without JavaScript).
 5. **Squad card** (full width): "Squad · 35 players used", grouped by position (plural headings), columns Player (photo, name, link), Apps, Min, Goals, Assists, Rating. Under 640px: Player, Apps, Goals, Rating.
 
 ### Components
