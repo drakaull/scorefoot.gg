@@ -35,6 +35,19 @@ Text on an Accent, Gold or rating background is always `#0B100D`.
 
 Ratings are shown as a badge: rating colour background, `#0B100D` text, one decimal (7.3).
 
+### League table zones
+A 3px bar on the left of the rank, and a legend under the table listing the zones present.
+
+| Zone | Hex |
+|------|-----|
+| Champions League | `#3DDC84` (Accent) |
+| Europa League | `#4C9AFF` |
+| Conference League | `#F5C451` (Gold) |
+| Relegation play-off | `#F5803E` |
+| Relegation | `#F2555A` (Error) |
+
+The page's club row: Surface raised background, name and rank in Accent.
+
 ### Comparator colours
 - Player 1: `#3DDC84` (Accent). Player 2: `#4C9AFF`. Radar fills use the same colours at 25% opacity.
 
@@ -68,6 +81,7 @@ Ratings are shown as a badge: rating colour background, `#0B100D` text, one deci
 - **Podium:** top 3 of a leaderboard as 3 big cards, rank number in Gold (#1), Text (#2, #3).
 - **Tabs:** Muted text, active tab in Text colour with a 2px Accent underline.
 - **Rating badge:** see rating scale above, 6px radius, min width 36px.
+- **Result chip:** 24px square, 6px radius, 12px 700 letter. Win: Accent background; draw: Surface raised, 1px Border, Muted letter; loss: Error background. Letters in the page's language (W D L / V N D).
 - **Navigation feedback:** a clicked tab turns active at once; the content it replaces fades to 50% opacity (after 100ms, 150ms transition) until the new content arrives. The search bar keeps its spinner until the opened page is on screen. No skeleton on pages that can be a 404 or a redirect.
 
 ## 07 Icons

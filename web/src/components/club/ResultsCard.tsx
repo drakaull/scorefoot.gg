@@ -34,7 +34,7 @@ export function ResultsCard({ results }: { results: ClubMatch[] }) {
                     <span aria-hidden="true" className="size-6 shrink-0" />
                   )}
                   <span className="shrink-0 text-caption text-muted">{t(m.home ? "homeShort" : "awayShort")}</span>
-                  <ClubName club={{ ...m.opponent, hasPage: true }} className="truncate font-semibold" />
+                  <ClubName club={m.opponent} className="truncate font-semibold" />
                 </div>
               </td>
               <td className={`${td} text-right font-bold whitespace-nowrap`}>

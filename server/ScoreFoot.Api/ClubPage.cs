@@ -44,11 +44,12 @@ public sealed record ClubPage(
                         && f.HomeGoals != null && f.AwayGoals != null)
             .Include(f => f.HomeTeam).Include(f => f.AwayTeam)
             .OrderByDescending(f => f.KickoffUtc).ToListAsync(ct);
+        var opponentsWithPage = await PlayerPage.WithPageAsync(db, fixtures.Select(f => f.HomeTeamId == id ? f.AwayTeamId : f.HomeTeamId).Distinct().ToList(), ct);
         var results = fixtures.Select(f =>
         {
             var home = f.HomeTeamId == id;
             var opp = home ? f.AwayTeam : f.HomeTeam;
-            return new ClubMatch(f.Id, f.KickoffUtc, f.Round, new Opponent(opp.Id, opp.Name, opp.Code, PlayerPage.Media(opp.LogoPath)), home,
+            return new ClubMatch(f.Id, f.KickoffUtc, f.Round, new Opponent(opp.Id, opp.Name, opp.Code, PlayerPage.Media(opp.LogoPath), opponentsWithPage.Contains(opp.Id)), home,
                 home ? f.HomeGoals!.Value : f.AwayGoals!.Value, home ? f.AwayGoals!.Value : f.HomeGoals!.Value);
         }).ToList();
 

@@ -109,7 +109,7 @@ public class PlayerPageTests
         var form = (await PlayerPage.LoadAsync(db, 1, null, Ct))!.Form;
 
         Assert.Equal([6, 5, 4, 3, 2], form.Select(m => m.FixtureId));
-        Assert.Equal(new FormMatch(6, start.AddDays(42), new Opponent(79, "Lille", "LIL", null), false, 1, 2, 66, null, 1, 0), form[0]);
+        Assert.Equal(new FormMatch(6, start.AddDays(42), new Opponent(79, "Lille", "LIL", null, false), false, 1, 2, 66, null, 1, 0), form[0]);
         Assert.Equal((true, 2, 1, 0), (form[1].Home, form[1].GoalsFor, form[1].GoalsAgainst, form[1].Goals));
     }
 

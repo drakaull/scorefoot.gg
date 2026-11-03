@@ -1,7 +1,7 @@
 // Shapes of the api's GET /players/{id} answer (ScoreFoot.Api/PlayerPage.cs).
 /** `hasPage` is false for clubs outside the 5 leagues: their name is plain text. */
 export type ClubRef = { id: number; name: string; logo: string | null; hasPage: boolean };
-export type Opponent = { id: number; name: string; code: string | null; logo: string | null };
+export type Opponent = { id: number; name: string; code: string | null; logo: string | null; hasPage: boolean };
 export type SeasonClub = ClubRef & { league: string };
 export type Summary = { appearances: number; minutes: number; goals: number; assists: number; rating: number | null };
 export type FormMatch = {

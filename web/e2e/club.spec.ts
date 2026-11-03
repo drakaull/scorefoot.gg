@@ -63,6 +63,8 @@ test("relegation play-offs show the play-off label and colour", async ({ page })
   await page.goto("/en/clubs/161-vfl-wolfsburg?season=2025");
   await expect(page.getByRole("row", { name: /VfL Wolfsburg/ })).toContainText("Relegation play-off");
   await expect(page.getByRole("heading", { name: "Season results" }).locator("..").getByText("Play-off").first()).toBeVisible();
+  // Paderborn (second division) has no page: plain text, not a link.
+  await expect(page.getByRole("link", { name: "SC Paderborn 07" })).toHaveCount(0);
 });
 
 test("French labels on /fr", async ({ page }) => {

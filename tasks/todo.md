@@ -11,5 +11,5 @@
 - [x] T9. Header, stat cards, form and key players
 - [x] T10. League table, results and squad
 - [x] T11. End-to-end tests
-- [ ] T12. Visual check ✋
+- [x] T12. Visual check ✋
 - [ ] T13. Acceptance, docs, review ✋

@@ -69,7 +69,7 @@ Response (example values, Real Madrid 2025-26):
 - `keyPlayers`: highest value, ties broken by minutes. `bestRated` needs 900+ minutes for the club (same threshold as the radar); `null` when nobody qualifies, as is any key player whose value is 0.
 - `table`: the league's standings of that season, by rank.
 - `squad`: played lines for the club, Goalkeeper → Defender → Midfielder → Attacker, then most minutes first.
-- Player answers (spec 03): `clubs[]` and `history[].club` get `hasPage` (false for clubs without a standing).
+- `hasPage` (false for clubs without a standing) on player answers (`clubs[]`, `history[].club`, `form[].opponent`) and on club `form` / `results` opponents: relegation play-off opponents from the second division have no page.
 
 ## Web
 ### Route
@@ -102,16 +102,16 @@ Response (example values, Real Madrid 2025-26):
 - New namespace `Club` in `en.json` and `fr.json`, zone names, ordinals (en "1st 2nd 3rd 4th", fr "1er 2e"). League, club and country names stay as the API gives them.
 
 ## Acceptance criteria
-- [ ] `/en/clubs/541-real-madrid` shows 2025-26: 2nd, 86 pts, 27-5-6, +42; key players Mbappé (25 goals, 7.5), Güler (9 assists), Courtois (2,880 min); Real Madrid highlighted in the La Liga table.
-- [ ] Getafe has the Gold bar, Real Sociedad the blue bar, Mallorca / Girona / Oviedo the red bar; the legend lists the 4 zones present.
-- [ ] Oviedo (promoted in 2025) has one season tab; `?season=2024` shows the 404 page.
-- [ ] `/en/clubs/541-x` redirects to `/en/clubs/541-real-madrid`; `/en/clubs/17000-crystal-palace-u21` shows the 404 page; "crystal palace u21" is not in search results.
-- [ ] G. Poussin's player page shows Red Star as plain text, not a link.
-- [ ] "Show all 38 matches" opens the rest of the results without JavaScript.
-- [ ] Search result, player header chip and club history links open the club page.
-- [ ] The api answers in under 200 ms locally (20 clubs, latest and oldest season); the page loads in under 1 s.
-- [ ] `/en` and `/fr` show every label in the right language; no request to a third-party domain.
-- [ ] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
+- [x] `/en/clubs/541-real-madrid` shows 2025-26: 2nd, 86 pts, 27-5-6, +42; key players Mbappé (25 goals, 7.5), Güler (9 assists), Courtois (2,880 min); Real Madrid highlighted in the La Liga table.
+- [x] Getafe has the Gold bar, Real Sociedad the blue bar, Mallorca / Girona / Oviedo the red bar; the legend lists the 4 zones present.
+- [x] Oviedo (promoted in 2025) has one season tab; `?season=2024` shows the 404 page.
+- [x] `/en/clubs/541-x` redirects to `/en/clubs/541-real-madrid`; `/en/clubs/17000-crystal-palace-u21` shows the 404 page; "crystal palace u21" is not in search results.
+- [x] G. Poussin's player page shows Red Star as plain text, not a link.
+- [x] "Show all 38 matches" opens the rest of the results without JavaScript.
+- [x] Search result, player header chip and club history links open the club page.
+- [x] The api answers in under 200 ms locally (20 clubs, latest and oldest season); the page loads in under 1 s.
+- [x] `/en` and `/fr` show every label in the right language; no request to a third-party domain.
+- [x] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
 
 ## Tests
 - xUnit (test database): latest season default and 404 cases, club without standing → 404 and absent from search, `previous` null for a promoted club, form and results order with the club's score side, key players (ties, 900-minute rule, zero values), squad order and empty lines ignored, zone mapping for every label in the table above, `hasPage` on player answers.

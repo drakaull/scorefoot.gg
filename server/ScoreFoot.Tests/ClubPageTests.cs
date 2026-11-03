@@ -31,7 +31,9 @@ public class ClubPageTests
         db.Fixtures.AddRange(
             new Fixture { Id = 1, LeagueId = 61, Season = 2025, Round = "Regular Season - 1", Status = "FT", KickoffUtc = Day, HomeTeamId = 85, AwayTeamId = 79, HomeGoals = 2, AwayGoals = 1 },
             new Fixture { Id = 2, LeagueId = 61, Season = 2025, Round = "Regular Season - 2", Status = "FT", KickoffUtc = Day.AddDays(7), HomeTeamId = 79, AwayTeamId = 85, HomeGoals = 3, AwayGoals = 0 },
-            new Fixture { Id = 3, LeagueId = 61, Season = 2025, Round = "Regular Season - 3", Status = "NS", KickoffUtc = Day.AddDays(14), HomeTeamId = 85, AwayTeamId = 80 });
+            new Fixture { Id = 3, LeagueId = 61, Season = 2025, Round = "Regular Season - 3", Status = "NS", KickoffUtc = Day.AddDays(14), HomeTeamId = 85, AwayTeamId = 80 },
+            // Relegation play-off against a club outside the 5 leagues: no page, so no link.
+            new Fixture { Id = 4, LeagueId = 61, Season = 2025, Round = "Relegation Round", Status = "FT", KickoffUtc = Day.AddDays(-7), HomeTeamId = 17000, AwayTeamId = 85, HomeGoals = 1, AwayGoals = 1 });
         Player P(int id, string name) => new() { Id = id, Name = name, NameSearch = name.ToLowerInvariant(), PhotoPath = $"players/{id}.png" };
         db.Players.AddRange(P(1, "Striker"), P(2, "Keeper"), P(3, "Defender"), P(4, "Unused"), P(5, "Super Sub"));
         PlayerSeasonStat L(int player, string position, int minutes, int? goals, decimal? rating) => new()
@@ -83,8 +85,8 @@ public class ClubPageTests
 
         // Fixture 3 has no score yet: left out.
         Assert.Equal(
-            [(2, false, 0, 3, "LIL"), (1, true, 2, 1, "LIL")],
-            page.Results.Select(m => (m.FixtureId, m.Home, m.GoalsFor, m.GoalsAgainst, m.Opponent.Code)));
+            [(2, false, 0, 3, "LIL", true), (1, true, 2, 1, "LIL", true), (4, false, 1, 1, null, false)],
+            page.Results.Select(m => (m.FixtureId, m.Home, m.GoalsFor, m.GoalsAgainst, m.Opponent.Code, m.Opponent.HasPage)));
         Assert.Equal(page.Results, page.Form);
     }
 
