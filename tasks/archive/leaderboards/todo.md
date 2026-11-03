@@ -7,4 +7,4 @@
 - [x] T5. Home preview cards and header link
 - [x] T6. End-to-end tests
 - [x] T7. Visual check ✋
-- [ ] T8. Acceptance, docs, review ✋
+- [x] T8. Acceptance, docs, review ✋
