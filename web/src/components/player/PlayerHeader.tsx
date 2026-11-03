@@ -2,11 +2,14 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ClubName } from "@/components/ClubName";
 import { chip, PageHeader } from "@/components/PageHeader";
+import { Link } from "@/i18n/navigation";
+import { compareHref } from "@/lib/compare";
 import { ageOn, type Player } from "@/lib/player";
 import { entityPath, initials } from "@/lib/slug";
 
 export function PlayerHeader({ player }: { player: Player }) {
   const t = useTranslations("Player");
+  const tCompare = useTranslations("Compare");
   const tPos = useTranslations("Position");
   const age = ageOn(player.birthDate, new Date());
 
@@ -53,6 +56,14 @@ export function PlayerHeader({ player }: { player: Player }) {
       seasons={player.seasons}
       season={player.season}
       seasonsLabel={t("seasons")}
+      action={
+        <Link
+          href={compareHref([{ id: player.id, name: player.name, season: player.season }, null])}
+          className="inline-flex h-10 items-center rounded-button bg-gold px-4 font-semibold text-ink hover:brightness-108"
+        >
+          {tCompare("button")}
+        </Link>
+      }
     />
   );
 }
