@@ -5,6 +5,6 @@
 - [x] T3. Leaderboard data and URL helpers (tests first)
 - [x] T4. Leaderboard page
 - [x] T5. Home preview cards and header link
-- [ ] T6. End-to-end tests
+- [x] T6. End-to-end tests
 - [ ] T7. Visual check ✋
 - [ ] T8. Acceptance, docs, review ✋
