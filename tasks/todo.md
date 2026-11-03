@@ -5,8 +5,8 @@
 - [x] T3. Club profile, standing, table (tests first)
 - [x] T4. Form and results (tests first)
 - [x] T5. Key players and squad (tests first)
-- [ ] T6. `GET /clubs/{id}` ✋
-- [ ] T7. Club data and formatting (tests first)
+- [x] T6. `GET /clubs/{id}` ✋
+- [x] T7. Club data and formatting (tests first)
 - [ ] T8. Route, states and texts
 - [ ] T9. Header, stat cards, form and key players
 - [ ] T10. League table, results and squad

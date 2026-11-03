@@ -11,7 +11,8 @@ import { StatCards } from "@/components/player/StatCards";
 import { StatsCard } from "@/components/player/StatsCard";
 import { permanentRedirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { fetchPlayer, parseId, parseSeason, seasonLabel } from "@/lib/player";
+import { fetchPage } from "@/lib/api";
+import { parseId, parseSeason, seasonLabel, type Player } from "@/lib/player";
 import { entityPath } from "@/lib/slug";
 
 type Props = {
@@ -24,7 +25,7 @@ const load = cache(async (slug: string, rawSeason: string | string[] | undefined
   const id = parseId(slug);
   const season = parseSeason(rawSeason);
   if (id === null || season === "invalid") notFound();
-  return (await fetchPlayer(id, season)) ?? notFound();
+  return (await fetchPage<Player>("players", id, season)) ?? notFound();
 });
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
