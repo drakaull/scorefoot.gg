@@ -6,7 +6,8 @@
   "Header": {
     "home": "Accueil ScoreFoot.gg",
     "language": "Langue",
-    "leaderboards": "Classements"
+    "leaderboards": "Classements",
+    "compare": "Comparer"
   },
   "Home": {
     "tagline": "Les stats de tous les joueurs des 5 grands championnats européens"
@@ -19,7 +20,8 @@
     "clubs": "Clubs",
     "loading": "Recherche…",
     "empty": "Aucun joueur ni club trouvé pour « {query} »",
-    "error": "La recherche est indisponible, réessaie"
+    "error": "La recherche est indisponible, réessaie",
+    "comparePlaceholder": "Choisir un joueur…"
   },
   "NotFound": {
     "title": "Page introuvable",
@@ -245,5 +247,27 @@
     "cardBestRated": "Mieux notés · {season}",
     "cardTopAssists": "Meilleurs passeurs · {season}",
     "seeAll": "Voir le classement complet →"
+  },
+  "Compare": {
+    "title": "Comparer · ScoreFoot.gg",
+    "titleVs": "{a} vs {b} · ScoreFoot.gg",
+    "description": "Deux joueurs côte à côte : chiffres clés, radars de percentiles et statistiques par 90 minutes.",
+    "heading": "Comparer",
+    "pick": "Choisissez un joueur à comparer",
+    "pickSecond": "Choisissez un second joueur à comparer",
+    "season": "Saison",
+    "apply": "Appliquer",
+    "goals": "Buts",
+    "assists": "Passes déc.",
+    "rating": "Note",
+    "minutes": "Minutes",
+    "age": "{age} ans",
+    "radarTitle": "Percentiles face aux {group}",
+    "radarNote": "Les deux comparés aux {group} avec {min}+ minutes sur leur saison, 5 grands championnats.",
+    "notEnough": "{name} a joué moins de {min} minutes en {season} : pas de forme.",
+    "radarLabel": "{name} : {list}",
+    "statsTitle": "Statistiques par 90 minutes",
+    "per90Total": "Par 90 (total)",
+    "button": "Comparer"
   }
 }

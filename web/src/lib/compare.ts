@@ -17,10 +17,10 @@ export function parseCompare(slugs: string[] | undefined, params: Record<string,
   return slots;
 }
 
-type Pick = { id: number; name: string; season?: number } | null;
+export type ComparePick = { id: number; name: string; season?: number } | null;
 
 /** Link to a comparison. Empty slots are skipped, so a lone second player becomes the first. */
-export function compareHref(slots: [Pick, Pick]) {
+export function compareHref(slots: [ComparePick, ComparePick]) {
   const chosen = slots.filter((s) => s !== null);
   const query: Record<string, number> = {};
   chosen.forEach((s, i) => {

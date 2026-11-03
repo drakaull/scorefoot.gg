@@ -29,9 +29,16 @@ export function validQuery(q: string | null): string | null {
 /** Same rule as the api (Media.cs): only "<folder>/<id>.png" written by the sync. */
 export const isMediaPath = (path: string) => /^(leagues|teams|players)\/[0-9]{1,10}\.png$/.test(path);
 
-/** Server side only: GET /{kind}/{id}?season=. Null when the api has no such page (404); throws when the api fails. */
-export async function fetchPage<T>(kind: "players" | "clubs", id: number, season: number | undefined): Promise<T | null> {
-  const query = season === undefined ? "" : `?season=${season}`;
+/** Server side only: GET /{kind}/{id}?season= (plus `extra` query values). Null when the api has no such page (404); throws when the api fails. */
+export async function fetchPage<T>(
+  kind: "players" | "clubs",
+  id: number,
+  season: number | undefined,
+  extra: Record<string, string> = {},
+): Promise<T | null> {
+  const params = new URLSearchParams(extra);
+  if (season !== undefined) params.set("season", String(season));
+  const query = params.size ? `?${params}` : "";
   const res = await fetch(`${apiUrl()}/${kind}/${id}${query}`, { cache: "no-store", signal: AbortSignal.timeout(5000) });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`${kind} ${id}: api answered ${res.status}`);

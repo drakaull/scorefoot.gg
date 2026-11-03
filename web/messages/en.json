@@ -6,7 +6,8 @@
   "Header": {
     "home": "ScoreFoot.gg home page",
     "language": "Language",
-    "leaderboards": "Leaderboards"
+    "leaderboards": "Leaderboards",
+    "compare": "Compare"
   },
   "Home": {
     "tagline": "Stats for every player in Europe's top 5 leagues"
@@ -19,7 +20,8 @@
     "clubs": "Clubs",
     "loading": "Searching…",
     "empty": "No player or club found for “{query}”",
-    "error": "Search is unavailable, try again"
+    "error": "Search is unavailable, try again",
+    "comparePlaceholder": "Pick a player…"
   },
   "NotFound": {
     "title": "Page not found",
@@ -245,5 +247,27 @@
     "cardBestRated": "Best rated · {season}",
     "cardTopAssists": "Top assists · {season}",
     "seeAll": "See the full leaderboard →"
+  },
+  "Compare": {
+    "title": "Compare · ScoreFoot.gg",
+    "titleVs": "{a} vs {b} · ScoreFoot.gg",
+    "description": "Two players side by side: key numbers, percentile radars and stats per 90 minutes.",
+    "heading": "Compare",
+    "pick": "Pick a player to compare",
+    "pickSecond": "Pick a second player to compare",
+    "season": "Season",
+    "apply": "Apply",
+    "goals": "Goals",
+    "assists": "Assists",
+    "rating": "Rating",
+    "minutes": "Minutes",
+    "age": "{age} y/o",
+    "radarTitle": "Percentiles vs {group}",
+    "radarNote": "Both compared with {group} who played {min}+ minutes in their season, top 5 leagues.",
+    "notEnough": "{name} played fewer than {min} minutes in {season}: no shape.",
+    "radarLabel": "{name}: {list}",
+    "statsTitle": "Stats per 90 minutes",
+    "per90Total": "Per 90 (total)",
+    "button": "Compare"
   }
 }
