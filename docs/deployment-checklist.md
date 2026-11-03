@@ -15,6 +15,7 @@ What must be done before ScoreFoot.gg goes on a public server. Each item links t
 - [ ] Cache `/api/search` answers briefly (the data only changes after a sync).
 - [ ] Check that `/media` images are cached by the browser and the proxy (`Cache-Control: public, max-age=604800` is already sent).
 - [ ] A club page loads about 60 images, each streamed through `web` then `api`. Let the reverse proxy serve and cache `/media` directly from the images volume so they do not compete with page rendering.
+- [ ] Every page sends all translations to the browser (about 10 KB). Pass only the namespaces client components use (Search, Leaderboards) to `NextIntlClientProvider`.
 
 ## Data and legal
 - [ ] Player photos and club logos belong to third parties (clubs, leagues, API-Football). Fine for a non-commercial portfolio; review the rights before any commercial use or wide publicity (ARCHITECTURE.md §05).

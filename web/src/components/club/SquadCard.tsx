@@ -1,11 +1,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/Card";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { RatingBadge } from "@/components/RatingBadge";
 import { Link } from "@/i18n/navigation";
 import type { SquadPlayer } from "@/lib/club";
 import { formatNumber } from "@/lib/player";
 import { entityPath } from "@/lib/slug";
-import { PlayerAvatar } from "./KeyPlayersCard";
 
 const cell = "px-2 first:pl-4 last:pr-4 sm:first:pl-5 sm:last:pr-5";
 const th = `${cell} py-2 text-caption font-semibold tracking-[0.04em] text-muted uppercase`;

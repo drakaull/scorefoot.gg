@@ -5,7 +5,8 @@
   },
   "Header": {
     "home": "Accueil ScoreFoot.gg",
-    "language": "Langue"
+    "language": "Langue",
+    "leaderboards": "Classements"
   },
   "Home": {
     "tagline": "Les stats de tous les joueurs des 5 grands championnats européens"
@@ -176,5 +177,73 @@
     "rating": "Note",
     "error": "Les statistiques sont indisponibles, réessayez",
     "retry": "Réessayer"
+  },
+  "Leaderboards": {
+    "title": "{stat} · ScoreFoot.gg",
+    "description": "Classement {stat} : {filters}.",
+    "Title": {
+      "goals": "Meilleurs buteurs",
+      "assists": "Meilleurs passeurs",
+      "goalsAssists": "Buts + passes déc.",
+      "rating": "Mieux notés",
+      "minutes": "Les plus utilisés",
+      "shotsOnTarget": "Tirs cadrés",
+      "keyPasses": "Passes clés",
+      "dribbles": "Dribbles réussis",
+      "tackles": "Tacles",
+      "interceptions": "Interceptions",
+      "duelsWon": "Duels gagnés",
+      "saves": "Arrêts"
+    },
+    "Chip": {
+      "goals": "Buts",
+      "assists": "Passes déc.",
+      "goalsAssists": "Buts + passes déc.",
+      "rating": "Note",
+      "minutes": "Minutes",
+      "shotsOnTarget": "Tirs cadrés",
+      "keyPasses": "Passes clés",
+      "dribbles": "Dribbles",
+      "tackles": "Tacles",
+      "interceptions": "Interceptions",
+      "duelsWon": "Duels gagnés",
+      "saves": "Arrêts"
+    },
+    "stats": "Statistiques",
+    "filters": "Filtres",
+    "league": "Championnat",
+    "season": "Saison",
+    "position": "Poste",
+    "age": "Âge",
+    "allLeagues": "5 grands championnats",
+    "allPositions": "Tous les postes",
+    "allAges": "Tous âges",
+    "Positions": {
+      "Goalkeeper": "Gardiens",
+      "Defender": "Défenseurs",
+      "Midfielder": "Milieux",
+      "Attacker": "Attaquants"
+    },
+    "Ages": {
+      "u21": "Moins de 21 ans",
+      "u23": "Moins de 23 ans"
+    },
+    "apply": "Appliquer",
+    "mode": "Valeurs",
+    "total": "Total",
+    "per90": "Par 90",
+    "perNinety": "{value} par 90",
+    "rank": "#",
+    "player": "Joueur",
+    "apps": "Matchs",
+    "min": "Min",
+    "minNote": "Joueurs avec {min}+ minutes.",
+    "empty": "Aucun joueur ne correspond à ces filtres.",
+    "reset": "Réinitialiser les filtres",
+    "podium": "Top 3",
+    "cardTopScorers": "Meilleurs buteurs · {season}",
+    "cardBestRated": "Mieux notés · {season}",
+    "cardTopAssists": "Meilleurs passeurs · {season}",
+    "seeAll": "Voir le classement complet →"
   }
 }
