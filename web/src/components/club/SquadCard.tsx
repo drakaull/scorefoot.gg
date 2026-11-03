@@ -46,7 +46,7 @@ export function SquadCard({ squad }: { squad: SquadPlayer[] }) {
                 <td className={`${td} w-full max-w-0 text-left`}>
                   <div className="flex min-w-0 items-center gap-2.5">
                     <PlayerAvatar name={p.name} photo={p.photo} />
-                    <Link href={entityPath("players", p.id, p.name)} className="truncate font-semibold hover:text-accent">
+                    <Link prefetch={false} href={entityPath("players", p.id, p.name)} className="truncate font-semibold hover:text-accent">
                       {p.name}
                     </Link>
                   </div>

@@ -38,7 +38,7 @@ export function KeyPlayersCard({ keyPlayers }: { keyPlayers: Club["keyPlayers"] 
             <div className="min-w-0">
               <p className="text-caption font-semibold tracking-[0.04em] text-muted uppercase">{label}</p>
               {player ? (
-                <Link href={entityPath("players", player.id, player.name)} className="block truncate font-semibold hover:text-accent">
+                <Link prefetch={false} href={entityPath("players", player.id, player.name)} className="block truncate font-semibold hover:text-accent">
                   {player.name}
                 </Link>
               ) : (
