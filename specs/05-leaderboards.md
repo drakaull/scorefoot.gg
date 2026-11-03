@@ -39,6 +39,7 @@ Rankings of players by stat over a season, filterable by league, position and ag
 - **Position:** the position of his line with the most minutes (as on his page).
 - **Club shown:** the club he played his last match of the season for (as on his page); with a league filter, his last club in that league.
 - **Age:** on 1 July of the season's first year (2025-26 → 1 July 2025). `u21` = under 21 on that day, `u23` = under 23. Players without a birth date are left out when an age filter is set.
+- **Zero values:** a player whose value is 0 (no goal, no save…) is left out, so a narrow filter shows the empty state rather than a list of zeros.
 - **Order:** value, highest first; ties: fewer minutes first (more efficient), then name. Ranks are 1 to 50 without gaps.
 
 ## API
