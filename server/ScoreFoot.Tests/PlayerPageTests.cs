@@ -34,6 +34,8 @@ public class PlayerPageTests
             S(1, 85, 61, 2024, 1000, 7.0m, 5),
             S(1, 79, 61, 2024, 500, null, 1),      // no rating: left out of the weighted rating
             S(2, 85, 61, 2025, 0, null, null));
+        // PSG played in the 5 leagues; Lille has no standing here, so no club page.
+        db.Standings.Add(new Standing { LeagueId = 61, Season = 2025, TeamId = 85, Rank = 1 });
         db.SaveChanges();
         return db;
     }
@@ -50,7 +52,8 @@ public class PlayerPageTests
         Assert.Equal((2025, "Attacker"), (page.Season, page.Position));
         Assert.Equal(new Summary(20, 1200, 2, 2, 7.25m), page.Summary);
         Assert.Equal(["Paris Saint Germain", "Lille"], page.Clubs.Select(c => c.Name));
-        Assert.Equal(new SeasonClub(85, "Paris Saint Germain", "/media/teams/85.png", "Ligue 1"), page.Clubs[0]);
+        Assert.Equal(new SeasonClub(85, "Paris Saint Germain", "/media/teams/85.png", "Ligue 1", true), page.Clubs[0]);
+        Assert.False(page.Clubs[1].HasPage);
         // 1,200 minutes over two clubs: in the radar group, alone (player 2 never played).
         Assert.Equal((true, 1), (page.Radar.Eligible, page.Radar.GroupSize));
     }
@@ -75,7 +78,7 @@ public class PlayerPageTests
         Assert.Equal(
             [(2025, "Paris Saint Germain", 900), (2025, "Lille", 300), (2024, "Paris Saint Germain", 1000), (2024, "Lille", 500)],
             page.History.Select(h => (h.Season, h.Club.Name, h.Minutes)));
-        Assert.Equal(new HistoryRow(2025, new ClubRef(85, "Paris Saint Germain", "/media/teams/85.png"), "Ligue 1", 10, 900, 0, 1, 7.0m),
+        Assert.Equal(new HistoryRow(2025, new ClubRef(85, "Paris Saint Germain", "/media/teams/85.png", true), "Ligue 1", 10, 900, 0, 1, 7.0m),
             page.History[0]);
     }
 
@@ -106,7 +109,7 @@ public class PlayerPageTests
         var form = (await PlayerPage.LoadAsync(db, 1, null, Ct))!.Form;
 
         Assert.Equal([6, 5, 4, 3, 2], form.Select(m => m.FixtureId));
-        Assert.Equal(new FormMatch(6, start.AddDays(42), new Opponent(79, "Lille", "LIL", null), false, 1, 2, 66, null, 1, 0), form[0]);
+        Assert.Equal(new FormMatch(6, start.AddDays(42), new Opponent(79, "Lille", "LIL", null, false), false, 1, 2, 66, null, 1, 0), form[0]);
         Assert.Equal((true, 2, 1, 0), (form[1].Home, form[1].GoalsFor, form[1].GoalsAgainst, form[1].Goals));
     }
 

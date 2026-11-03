@@ -14,7 +14,8 @@ public class SearchTests
         db.Leagues.Add(new League { Id = 61, Name = "Ligue 1", Country = "France" });
         db.Teams.AddRange(
             new Team { Id = 85, Name = "Paris Saint Germain", NameSearch = "paris saint germain", Code = "PSG", Country = "France", LogoPath = "teams/85.png" },
-            new Team { Id = 79, Name = "Lille", NameSearch = "lille", Code = "LIL", Country = "France" });
+            new Team { Id = 79, Name = "Lille", NameSearch = "lille", Code = "LIL", Country = "France" },
+            new Team { Id = 17000, Name = "Paris Saint Germain U21", NameSearch = "paris saint germain u21" }); // no standing: not in the 5 leagues
         db.Standings.AddRange(
             new Standing { LeagueId = 61, Season = 2025, TeamId = 85, Rank = 1 },
             new Standing { LeagueId = 61, Season = 2025, TeamId = 79, Rank = 2 });
@@ -95,6 +96,13 @@ public class SearchTests
         var psg = Assert.Single((await Search.RunAsync(db, "psg", Ct)).Clubs);
         Assert.Equal(new ClubResult(85, "Paris Saint Germain", "/media/teams/85.png", "Ligue 1", "France"), psg);
         Assert.Equal(79, Assert.Single((await Search.RunAsync(db, "lil", Ct)).Clubs).Id);
+    }
+
+    [Fact]
+    public async Task Clubs_without_a_standing_are_left_out()
+    {
+        using var db = Seed();
+        Assert.Equal(85, Assert.Single((await Search.RunAsync(db, "paris saint", Ct)).Clubs).Id);
     }
 
     [Fact]

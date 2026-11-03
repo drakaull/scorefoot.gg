@@ -31,6 +31,7 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - Numbers in tables use tabular figures; ratings always show one decimal
 - Images (photos, logos) are always served by api/, never hotlinked
 - Pages that can answer 404 or redirect (player, club) have no loading.tsx: it would send "200 OK" first. Show navigation feedback with LinkPending instead
+- Links in lists and tables (players, clubs) use prefetch={false}: Next.js would otherwise render every linked page on the server
 
 ## 04 Security
 - No secrets in code: use untracked .env files

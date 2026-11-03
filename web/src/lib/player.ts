@@ -1,13 +1,13 @@
-import { apiUrl } from "./api";
-
 // Shapes of the api's GET /players/{id} answer (ScoreFoot.Api/PlayerPage.cs).
-export type ClubRef = { id: number; name: string; logo: string | null };
+/** `hasPage` is false for clubs outside the 5 leagues: their name is plain text. */
+export type ClubRef = { id: number; name: string; logo: string | null; hasPage: boolean };
+export type Opponent = { id: number; name: string; code: string | null; logo: string | null; hasPage: boolean };
 export type SeasonClub = ClubRef & { league: string };
 export type Summary = { appearances: number; minutes: number; goals: number; assists: number; rating: number | null };
 export type FormMatch = {
   fixtureId: number;
   kickoffUtc: string;
-  opponent: ClubRef & { code: string | null };
+  opponent: Opponent;
   home: boolean;
   goalsFor: number | null;
   goalsAgainst: number | null;
@@ -48,15 +48,6 @@ export type Player = {
   stats: StatGroup[];
   history: HistoryRow[];
 };
-
-/** Server side only. Null when the api has no such page (404); throws when the api fails. */
-export async function fetchPlayer(id: number, season: number | undefined): Promise<Player | null> {
-  const query = season === undefined ? "" : `?season=${season}`;
-  const res = await fetch(`${apiUrl()}/players/${id}${query}`, { cache: "no-store", signal: AbortSignal.timeout(5000) });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`player ${id}: api answered ${res.status}`);
-  return res.json();
-}
 
 /** "278-kylian-mbappe" → 278. The slug part is decorative. */
 export function parseId(slug: string): number | null {

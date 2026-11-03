@@ -3,10 +3,11 @@ using ScoreFoot.Data;
 
 namespace ScoreFoot.Api;
 
-public sealed record ClubRef(int Id, string Name, string? Logo);
-public sealed record SeasonClub(int Id, string Name, string? Logo, string League);
+/// <param name="HasPage">False for clubs without a standing in the 5 leagues: shown as plain text.</param>
+public sealed record ClubRef(int Id, string Name, string? Logo, bool HasPage);
+public sealed record SeasonClub(int Id, string Name, string? Logo, string League, bool HasPage);
 public sealed record Summary(int Appearances, int Minutes, int Goals, int Assists, decimal? Rating);
-public sealed record Opponent(int Id, string Name, string? Code, string? Logo);
+public sealed record Opponent(int Id, string Name, string? Code, string? Logo, bool HasPage);
 public sealed record FormMatch(int FixtureId, DateTimeOffset KickoffUtc, Opponent Opponent, bool Home,
     int? GoalsFor, int? GoalsAgainst, int Minutes, decimal? Rating, int Goals, int Assists);
 public sealed record HistoryRow(int Season, ClubRef Club, string League, int Appearances, int Minutes, int Goals, int Assists, decimal? Rating);
@@ -46,6 +47,11 @@ public sealed record PlayerPage(
             .ThenByDescending(l => l.Minutes)
             .ToList();
 
+        var teamIds = lines.Select(l => l.TeamId).Distinct().ToList();
+
+        var withPage = await WithPageAsync(db, teamIds, ct);
+
+
         var seasons = lines.Select(l => l.Season).Distinct().ToList();
         var chosen = season ?? seasons[0];
         var current = lines.Where(l => l.Season == chosen).ToList();
@@ -57,12 +63,13 @@ public sealed record PlayerPage(
             .OrderByDescending(s => s.Fixture.KickoffUtc).Take(FormSize)
             .Include(s => s.Fixture.HomeTeam).Include(s => s.Fixture.AwayTeam)
             .ToListAsync(ct);
+        var opponentsWithPage = await WithPageAsync(db, matches.SelectMany(s => new[] { s.Fixture.HomeTeamId, s.Fixture.AwayTeamId }).Distinct().ToList(), ct);
         var form = matches.Select(s =>
         {
             var f = s.Fixture;
             var home = s.TeamId == f.HomeTeamId;
             var opp = home ? f.AwayTeam : f.HomeTeam;
-            return new FormMatch(f.Id, f.KickoffUtc, new Opponent(opp.Id, opp.Name, opp.Code, Media(opp.LogoPath)), home,
+            return new FormMatch(f.Id, f.KickoffUtc, new Opponent(opp.Id, opp.Name, opp.Code, Media(opp.LogoPath), opponentsWithPage.Contains(opp.Id)), home,
                 home ? f.HomeGoals : f.AwayGoals, home ? f.AwayGoals : f.HomeGoals,
                 s.Minutes ?? 0, s.Rating, s.Goals ?? 0, s.Assists ?? 0);
         }).ToList();
@@ -74,9 +81,9 @@ public sealed record PlayerPage(
         return new PlayerPage(
             player.Id, player.Name, Media(player.PhotoPath), player.BirthDate, player.Nationality, player.HeightCm,
             seasons, chosen, position,
-            current.Select(l => new SeasonClub(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), l.League.Name)).ToList(),
+            current.Select(l => new SeasonClub(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), l.League.Name, withPage.Contains(l.TeamId))).ToList(),
             Summarize(totals), previous.Count > 0 ? Summarize(previous) : null, form, radar, StatGroups.Build(position, totals),
-            lines.Select(l => new HistoryRow(l.Season, new ClubRef(l.TeamId, l.Team.Name, Media(l.Team.LogoPath)), l.League.Name,
+            lines.Select(l => new HistoryRow(l.Season, new ClubRef(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), withPage.Contains(l.TeamId)), l.League.Name,
                 l.Appearances ?? 0, l.Minutes ?? 0, l.Goals ?? 0, l.Assists ?? 0, l.Rating)).ToList());
     }
 
@@ -105,6 +112,13 @@ public sealed record PlayerPage(
         return rated.Count == 0 ? null
             : Math.Round(rated.Sum(l => l.Rating!.Value * l.Minutes!.Value) / rated.Sum(l => l.Minutes!.Value), 2);
     }
+
+    /// <summary>Ids among <paramref name="teamIds"/> of clubs with a standing in the 5 leagues, the only ones with a page.</summary>
+
+    internal static async Task<HashSet<int>> WithPageAsync(ScoreFootDbContext db, List<int> teamIds, CancellationToken ct) =>
+
+        (await db.Standings.Where(s => teamIds.Contains(s.TeamId)).Select(s => s.TeamId).Distinct().ToListAsync(ct)).ToHashSet();
+
 
     internal static string? Media(string? path) => path is null ? null : "/media/" + path;
 }
