@@ -1,22 +1,11 @@
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/Card";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { RatingBadge } from "@/components/RatingBadge";
 import { Link } from "@/i18n/navigation";
 import type { Club, KeyPlayer } from "@/lib/club";
 import { formatNumber } from "@/lib/player";
-import { entityPath, initials } from "@/lib/slug";
-
-/** Photo or initials, 32px circle. */
-export function PlayerAvatar({ name, photo }: { name: string; photo: string | null }) {
-  return photo ? (
-    <Image src={photo} alt="" width={32} height={32} unoptimized className="size-8 shrink-0 rounded-full border border-border bg-raised object-cover" />
-  ) : (
-    <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full border border-border bg-raised text-caption font-bold text-muted">
-      {initials(name)}
-    </span>
-  );
-}
+import { entityPath } from "@/lib/slug";
 
 /** Top scorer, top assists, best rated (900+ min) and most used player of the season. */
 export function KeyPlayersCard({ keyPlayers }: { keyPlayers: Club["keyPlayers"] }) {

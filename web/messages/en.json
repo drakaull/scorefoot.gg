@@ -5,7 +5,8 @@
   },
   "Header": {
     "home": "ScoreFoot.gg home page",
-    "language": "Language"
+    "language": "Language",
+    "leaderboards": "Leaderboards"
   },
   "Home": {
     "tagline": "Stats for every player in Europe's top 5 leagues"
@@ -176,5 +177,73 @@
     "rating": "Rating",
     "error": "Stats are unavailable, try again",
     "retry": "Try again"
+  },
+  "Leaderboards": {
+    "title": "{stat} · ScoreFoot.gg",
+    "description": "Top players by {stat}: {filters}.",
+    "Title": {
+      "goals": "Top scorers",
+      "assists": "Top assists",
+      "goalsAssists": "Goals + assists",
+      "rating": "Best rated",
+      "minutes": "Most minutes",
+      "shotsOnTarget": "Shots on target",
+      "keyPasses": "Key passes",
+      "dribbles": "Successful dribbles",
+      "tackles": "Tackles",
+      "interceptions": "Interceptions",
+      "duelsWon": "Duels won",
+      "saves": "Saves"
+    },
+    "Chip": {
+      "goals": "Goals",
+      "assists": "Assists",
+      "goalsAssists": "Goals + assists",
+      "rating": "Rating",
+      "minutes": "Minutes",
+      "shotsOnTarget": "Shots on target",
+      "keyPasses": "Key passes",
+      "dribbles": "Dribbles",
+      "tackles": "Tackles",
+      "interceptions": "Interceptions",
+      "duelsWon": "Duels won",
+      "saves": "Saves"
+    },
+    "stats": "Stats",
+    "filters": "Filters",
+    "league": "League",
+    "season": "Season",
+    "position": "Position",
+    "age": "Age",
+    "allLeagues": "Top 5 leagues",
+    "allPositions": "All positions",
+    "allAges": "All ages",
+    "Positions": {
+      "Goalkeeper": "Goalkeepers",
+      "Defender": "Defenders",
+      "Midfielder": "Midfielders",
+      "Attacker": "Attackers"
+    },
+    "Ages": {
+      "u21": "Under 21",
+      "u23": "Under 23"
+    },
+    "apply": "Apply",
+    "mode": "Values",
+    "total": "Total",
+    "per90": "Per 90",
+    "perNinety": "{value} per 90",
+    "rank": "#",
+    "player": "Player",
+    "apps": "Apps",
+    "min": "Min",
+    "minNote": "Players with {min}+ minutes.",
+    "empty": "No player matches these filters.",
+    "reset": "Reset filters",
+    "podium": "Top 3",
+    "cardTopScorers": "Top scorers · {season}",
+    "cardBestRated": "Best rated · {season}",
+    "cardTopAssists": "Top assists · {season}",
+    "seeAll": "See the full leaderboard →"
   }
 }
