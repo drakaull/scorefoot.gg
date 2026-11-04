@@ -46,15 +46,15 @@ Two players side by side: key numbers, overlaid percentile radars and a per-90 s
 - New namespace `Compare` in `en.json` and `fr.json`; `Header.compare`.
 
 ## Acceptance criteria
-- [ ] `/en/compare/278-kylian-mbappe/1100-erling-haaland`: Mbappé 25 goals, 7.5; Haaland 27 goals, 7.3; radar key passes 96 vs 21, duels won 84 vs 96; key passes per 90 2.25 (green) vs 0.76; yellow cards per 90 Haaland 0.06 highlighted in blue (lower wins).
-- [ ] Mbappé vs Dean Huijsen (defender): Huijsen is drawn on the attacker axes, ranked among attackers; every percentile is between 0 and 100.
-- [ ] Jadon Sancho 2025-26 (891 minutes) as player 2: no blue shape, the note says why.
-- [ ] `?s1=2022` shows Mbappé's 2022-23 season (PSG) against Haaland 2025-26.
-- [ ] Player page "Compare" button → `/en/compare/278-kylian-mbappe?s1=2025`; picking Haaland in slot 2 → the full comparison.
-- [ ] `/en/compare/278-x/1100-y` redirects to the right slugs; `/en/compare/999999999-x` and `?s1=1990` show the 404 page; `radarPosition=Winger` → 400 from the api.
-- [ ] Header: "Compare" link works; at 390px the header fits (logo mark only), in English and French.
-- [ ] `/en` and `/fr` show every label in the right language; no request to a third-party domain; the page loads in under 1 s.
-- [ ] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
+- [x] `/en/compare/278-kylian-mbappe/1100-erling-haaland`: Mbappé 25 goals, 7.5; Haaland 27 goals, 7.3; radar key passes 96 vs 21, duels won 84 vs 96; key passes per 90 2.25 (green) vs 0.76; yellow cards per 90 Haaland 0.06 highlighted in blue (lower wins).
+- [x] Mbappé vs Dean Huijsen (defender): Huijsen is drawn on the attacker axes, ranked among attackers; every percentile is between 0 and 100.
+- [x] Jadon Sancho 2025-26 (891 minutes) as player 2: no blue shape, the note says why.
+- [x] `?s1=2022` shows Mbappé's 2022-23 season (PSG) against Haaland 2025-26.
+- [x] Player page "Compare" button → `/en/compare/278-kylian-mbappe?s1=2025`; picking Haaland in slot 2 → the full comparison.
+- [x] `/en/compare/278-x/1100-y` redirects to the right slugs; `/en/compare/999999999-x` and `?s1=1990` show the 404 page; `radarPosition=Winger` → 400 from the api.
+- [x] Header: "Compare" link works; at 390px the header fits (logo mark only), in English and French.
+- [x] `/en` and `/fr` show every label in the right language; no request to a third-party domain; the page loads in under 1 s.
+- [x] Checked in Chrome and Firefox, desktop and 390px wide; screenshots shown to Léonard.
 
 ## Tests
 - xUnit: `radarPosition` uses that position's axes; a player of another position is added to the group and gets percentiles in 0–100; invalid `radarPosition` refused; no change without it.

@@ -50,6 +50,7 @@ The page's club row: Surface raised background, name and rank in Accent.
 
 ### Comparator colours
 - Player 1: `#3DDC84` (Accent). Player 2: `#4C9AFF`. Radar fills use the same colours at 25% opacity.
+- Each player card has a 3px top bar and a 2px photo ring in its colour. In the stat table the better value is bold in its player's colour (lower wins for fouls, cards and goals conceded).
 
 ## 03 Typography
 - **Font:** Plus Jakarta Sans, self-hosted (no Google Fonts request). Fallback: `system-ui, sans-serif`.
@@ -84,7 +85,7 @@ The page's club row: Surface raised background, name and rank in Accent.
 - **Result chip:** 24px square, 6px radius, 12px 700 letter. Win: Accent background; draw: Surface raised, 1px Border, Muted letter; loss: Error background. Letters in the page's language (W D L / V N D).
 - **Stat chips:** Surface raised, 1px Border, 6px radius, Muted 15px 600 text; active chip Accent background with `#0B100D` text. One row that scrolls sideways on mobile.
 - **Filter select:** native `<select>`, 36px high, Surface raised, 1px Border, 6px radius, 15px 600 text; focus 2px Accent outline. A change applies at once.
-- **Header link:** Muted 600 text; on its section's pages Text colour with a 2px Accent underline at the bottom of the header.
+- **Header link:** Muted 600 text; on its section's pages Text colour with a 2px Accent underline at the bottom of the header. Under 640px the header shows the logo mark without its text, so both links and the language switch fit at 390px.
 - **Navigation feedback:** a clicked tab turns active at once; the content it replaces fades to 50% opacity (after 100ms, 150ms transition) until the new content arrives. The search bar keeps its spinner until the opened page is on screen. No skeleton on pages that can be a 404 or a redirect.
 
 ## 07 Icons
