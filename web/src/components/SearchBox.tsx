@@ -5,18 +5,27 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { type SearchResults, validQuery } from "@/lib/api";
+import { type PlayerResult, type SearchResults, validQuery } from "@/lib/api";
+import { compareHref, type ComparePick } from "@/lib/compare";
 import { createSearch, fetchSearch, type SearchState } from "@/lib/search-client";
 import { entityPath, initials } from "@/lib/slug";
 
-type Item = { key: string; href: string; name: string; sub: string; image: string | null; round: boolean };
+type Href = string | ReturnType<typeof compareHref>;
+type Item = { key: string; href: Href; name: string; sub: string; image: string | null; round: boolean };
 type Shown = { query: string; results: SearchResults };
 
-// Same order as the list: players first, then clubs.
-const firstHref = ({ players: [p], clubs: [c] }: SearchResults) =>
-  p ? entityPath("players", p.id, p.name) : c ? entityPath("clubs", c.id, c.name) : null;
+/** Comparator use: players only, a choice fills `slot` and keeps the other player. */
+export type CompareTarget = { slot: 0 | 1; picks: [ComparePick, ComparePick] };
 
-export function SearchBox() {
+const playerHref = (p: PlayerResult, compare: CompareTarget | undefined): Href => {
+  if (!compare) return entityPath("players", p.id, p.name);
+  const picks: [ComparePick, ComparePick] = [...compare.picks];
+  picks[compare.slot] = { id: p.id, name: p.name };
+  return compareHref(picks);
+};
+
+/** The search bar: big on the home page; `compact` and `compare` for a comparator slot (players only, no Ctrl+K). */
+export function SearchBox({ compact = false, compare }: { compact?: boolean; compare?: CompareTarget }) {
   const t = useTranslations("Search");
   const tPos = useTranslations("Position");
   const router = useRouter();
@@ -40,7 +49,10 @@ export function SearchBox() {
       if (s.status === "idle" || s.status === "error") setShown(null);
       if (s.status !== "done") return;
       setShown({ query: s.query, results: s.results });
-      const href = pendingEnter.current ? firstHref(s.results) : null;
+      // Same order as the list: players first, then clubs.
+      const [p] = s.results.players;
+      const [c] = compare ? [] : s.results.clubs;
+      const href = !pendingEnter.current ? null : p ? playerHref(p, compare) : c ? entityPath("clubs", c.id, c.name) : null;
       pendingEnter.current = false;
       if (href) {
         setOpen(false);
@@ -50,8 +62,9 @@ export function SearchBox() {
     searchRef.current(input);
   };
 
-  // Ctrl+K / Cmd+K focuses the bar from anywhere on the page.
+  // Ctrl+K / Cmd+K focuses the bar from anywhere on the page (the home bar only).
   useEffect(() => {
+    if (compact) return;
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -61,19 +74,19 @@ export function SearchBox() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [compact]);
 
   const position = (p: string | null) => (p && tPos.has(p) ? tPos(p) : p);
   const results = shown?.results ?? null;
   const players: Item[] = (results?.players ?? []).map((p) => ({
     key: `p${p.id}`,
-    href: entityPath("players", p.id, p.name),
+    href: playerHref(p, compare),
     name: p.name,
     sub: [p.club, position(p.position)].filter(Boolean).join(" · "),
     image: p.photo,
     round: true,
   }));
-  const clubs: Item[] = (results?.clubs ?? []).map((c) => ({
+  const clubs: Item[] = (compare ? [] : (results?.clubs ?? [])).map((c) => ({
     key: `c${c.id}`,
     href: entityPath("clubs", c.id, c.name),
     name: c.name,
@@ -154,8 +167,12 @@ export function SearchBox() {
     );
 
   return (
-    <div className="relative mx-auto mt-7 max-w-[680px] text-left">
-      <div className="flex h-14 items-center gap-3 rounded-card border border-border bg-raised px-4 text-muted focus-within:outline-2 focus-within:outline-accent">
+    <div className={`relative text-left ${compact ? "" : "mx-auto mt-7 max-w-[680px]"}`}>
+      <div
+        className={`flex items-center gap-3 border border-border bg-raised text-muted focus-within:outline-2 focus-within:outline-accent ${
+          compact ? "h-9 rounded-sm px-3" : "h-14 rounded-card px-4"
+        }`}
+      >
         {state.status === "loading" || navigating ? (
           <LoaderCircle aria-hidden="true" size={20} strokeWidth={1.75} className="shrink-0 animate-spin" />
         ) : (
@@ -165,14 +182,14 @@ export function SearchBox() {
           ref={inputRef}
           type="text"
           role="combobox"
-          aria-label={t("label")}
+          aria-label={t(compare ? "comparePlaceholder" : "label")}
           aria-expanded={showList}
           aria-controls={`${id}-listbox`}
           aria-autocomplete="list"
           aria-activedescendant={showList && items.length ? optionId(active) : undefined}
           autoComplete="off"
           spellCheck={false}
-          placeholder={t("placeholder")}
+          placeholder={t(compare ? "comparePlaceholder" : "placeholder")}
           value={text}
           onChange={(e) => {
             setText(e.target.value);
@@ -187,11 +204,13 @@ export function SearchBox() {
             setOpen(false);
           }}
           onKeyDown={onKeyDown}
-          className="h-full min-w-0 flex-1 bg-transparent text-body text-text outline-none placeholder:text-muted sm:text-h3"
+          className={`h-full min-w-0 flex-1 bg-transparent text-body text-text outline-none placeholder:text-muted ${compact ? "" : "sm:text-h3"}`}
         />
-        <kbd className="hidden shrink-0 rounded-sm border border-border px-2 py-0.5 font-sans text-caption font-semibold sm:block">
-          {t("shortcut")}
-        </kbd>
+        {!compact && (
+          <kbd className="hidden shrink-0 rounded-sm border border-border px-2 py-0.5 font-sans text-caption font-semibold sm:block">
+            {t("shortcut")}
+          </kbd>
+        )}
       </div>
 
       <div

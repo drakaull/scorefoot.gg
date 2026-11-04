@@ -11,10 +11,12 @@ export function Header() {
       <div className="mx-auto flex h-[60px] max-w-[1200px] items-center gap-4 px-4 sm:gap-6 lg:px-6">
         <Link href="/" aria-label={t("home")} className="flex items-center gap-2 text-lg font-extrabold">
           <Mark />
-          ScoreFoot.gg
+          {/* Under 640px the mark alone leaves room for the two links and the language switch. */}
+          <span className="max-sm:sr-only">ScoreFoot.gg</span>
         </Link>
-        <nav className="h-full">
+        <nav className="flex h-full gap-4 sm:gap-6">
           <NavLink href="/leaderboards">{t("leaderboards")}</NavLink>
+          <NavLink href="/compare">{t("compare")}</NavLink>
         </nav>
         <LocaleSwitch />
       </div>

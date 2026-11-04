@@ -25,7 +25,9 @@ public sealed record PlayerPage(
     public const int FormSize = 5;
 
     /// <summary>The page for <paramref name="season"/> (latest played season when null), or null when there is none.</summary>
-    public static async Task<PlayerPage?> LoadAsync(ScoreFootDbContext db, int id, int? season, CancellationToken ct = default)
+    /// <param name="radarPosition">Rank on this position's axes and group instead of his own (comparator).</param>
+    public static async Task<PlayerPage?> LoadAsync(ScoreFootDbContext db, int id, int? season, CancellationToken ct = default,
+        string? radarPosition = null)
     {
         var player = await db.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
         if (player is null) return null;
@@ -76,7 +78,11 @@ public sealed record PlayerPage(
 
         var position = current.MaxBy(l => l.Minutes)!.Position;
         var totals = SeasonTotals.From(current);
-        var radar = Api.Radar.Build(position, totals, await RadarGroupAsync(db, chosen, position, ct));
+        var radarPos = radarPosition ?? position;
+        var group = await RadarGroupAsync(db, chosen, radarPos, ct);
+        // Ranked against another position: join that group for the ranking, so percentiles stay within 0-100.
+        if (radarPos != position) group.Add(totals);
+        var radar = Api.Radar.Build(radarPos, totals, group);
 
         return new PlayerPage(
             player.Id, player.Name, Media(player.PhotoPath), player.BirthDate, player.Nationality, player.HeightCm,
@@ -118,6 +124,10 @@ public sealed record PlayerPage(
     internal static async Task<HashSet<int>> WithPageAsync(ScoreFootDbContext db, List<int> teamIds, CancellationToken ct) =>
 
         (await db.Standings.Where(s => teamIds.Contains(s.TeamId)).Select(s => s.TeamId).Distinct().ToListAsync(ct)).ToHashSet();
+
+
+    public static bool IsRadarPosition(string position) => Api.Radar.HasAxes(position);
+
 
 
     internal static string? Media(string? path) => path is null ? null : "/media/" + path;

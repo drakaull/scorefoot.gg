@@ -2,6 +2,13 @@
 
 Football stats for the 5 big European leagues (Premier League, La Liga, Serie A, Bundesliga, Ligue 1), seasons 2022 to 2025. Search any player or club in English or French.
 
+## Features
+- **Search** every player and club, typo- and accent-tolerant.
+- **Player page:** season numbers, last 5 matches, percentile radar against his position, per-90 stats, club history.
+- **Club page:** league position, form, key players, full league table with zones, season results, squad.
+- **Leaderboards:** 12 stats, total or per 90, filtered by league, season, position and age; previews on the home page.
+- **Compare** two players, each on any season: overlaid radars and per-90 stats.
+
 A portfolio project. Data comes from [API-Football](https://www.api-football.com/), downloaded once into a local database: the site never calls API-Football while you browse.
 
 ## Stack

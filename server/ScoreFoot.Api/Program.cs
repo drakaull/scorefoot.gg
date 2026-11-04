@@ -29,8 +29,10 @@ app.MapGet("/search", async (string? q, ScoreFootDbContext db, CancellationToken
         ? Results.Ok(await Search.RunAsync(db, query, ct))
         : Results.BadRequest(new { error = "q must be 2 to 50 characters long" }));
 
-app.MapGet("/players/{id:int}", async (int id, int? season, ScoreFootDbContext db, CancellationToken ct) =>
-    await PlayerPage.LoadAsync(db, id, season, ct) is { } page ? Results.Ok(page) : Results.NotFound());
+app.MapGet("/players/{id:int}", async (int id, int? season, string? radarPosition, ScoreFootDbContext db, CancellationToken ct) =>
+    radarPosition is not null && !PlayerPage.IsRadarPosition(radarPosition)
+        ? Results.BadRequest(new { error = "unknown radar position" })
+        : await PlayerPage.LoadAsync(db, id, season, ct, radarPosition) is { } page ? Results.Ok(page) : Results.NotFound());
 
 app.MapGet("/clubs/{id:int}", async (int id, int? season, ScoreFootDbContext db, CancellationToken ct) =>
     await ClubPage.LoadAsync(db, id, season, ct) is { } page ? Results.Ok(page) : Results.NotFound());

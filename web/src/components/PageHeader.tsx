@@ -15,10 +15,12 @@ type Props = {
   seasons: number[];
   season: number;
   seasonsLabel: string;
+  /** Optional button on the right of the name (the player page's Compare button). */
+  action?: ReactNode;
 };
 
 /** Header card of player and club pages: picture, name, chips, then season tabs (links, with instant feedback). */
-export function PageHeader({ image, name, chips, path, seasons, season: current, seasonsLabel }: Props) {
+export function PageHeader({ image, name, chips, path, seasons, season: current, seasonsLabel, action }: Props) {
   return (
     <Card>
       <div className="flex flex-wrap items-center gap-4 p-4 sm:flex-nowrap sm:gap-6 sm:p-6">
@@ -27,6 +29,7 @@ export function PageHeader({ image, name, chips, path, seasons, season: current,
           <h1 className="text-h1-mobile leading-tight font-bold sm:text-h1">{name}</h1>
           <ul className="mt-2.5 flex flex-wrap gap-2">{chips}</ul>
         </div>
+        {action && <div className="w-full sm:ml-auto sm:w-auto sm:shrink-0">{action}</div>}
       </div>
       <nav aria-label={seasonsLabel} className="flex gap-6 overflow-x-auto border-t border-border px-4 sm:px-6">
         {seasons.map((season) => (

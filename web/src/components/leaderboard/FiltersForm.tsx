@@ -1,32 +1,16 @@
-"use client";
-
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { AutoSubmitForm } from "@/components/AutoSubmitForm";
 import { AGES, POSITIONS, type Leaderboard } from "@/lib/leaderboard";
 import { seasonLabel } from "@/lib/player";
 
-const select =
+export const select =
   "h-9 rounded-sm border border-border bg-raised px-3 text-body font-semibold text-text focus-visible:outline-2 focus-visible:outline-accent";
 
-/**
- * League, season, position and age as a plain GET form: a change applies at once (with the page fading while it loads);
- * without JavaScript the Apply button submits it.
- */
+/** League, season, position and age; a change applies at once (Apply button without JavaScript). */
 export function FiltersForm({ board }: { board: Leaderboard }) {
   const t = useTranslations("Leaderboards");
-  const router = useRouter();
-  const pathname = usePathname();
-  const [pending, startTransition] = useTransition();
-
-  const apply = (form: HTMLFormElement) => {
-    const query = new URLSearchParams();
-    for (const [key, value] of new FormData(form)) if (typeof value === "string" && value) query.set(key, value);
-    startTransition(() => router.push(`${pathname}${query.size ? `?${query}` : ""}`));
-  };
-
   return (
-    <form method="get" action={pathname} aria-label={t("filters")} onChange={(e) => apply(e.currentTarget)} className="flex flex-wrap gap-2">
+    <AutoSubmitForm label={t("filters")} apply={t("apply")} className="flex flex-wrap gap-2">
       <select name="league" aria-label={t("league")} defaultValue={board.league ?? ""} className={select}>
         <option value="">{t("allLeagues")}</option>
         {board.leagues.map((l) => (
@@ -59,13 +43,6 @@ export function FiltersForm({ board }: { board: Leaderboard }) {
         ))}
       </select>
       {board.mode === "per90" && <input type="hidden" name="mode" value="per90" />}
-      <noscript>
-        <button type="submit" className={`${select} text-accent`}>
-          {t("apply")}
-        </button>
-      </noscript>
-      {/* Read by the fade rule in globals.css, like a pending link. */}
-      {pending && <span data-link-pending hidden />}
-    </form>
+    </AutoSubmitForm>
   );
 }
