@@ -39,6 +39,7 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 - The API-Football key is read only by ScoreFoot.Sync from .env. It never appears in web/, api/, logs or the browser
 - api/ is read-only: no endpoint writes to the database
 - No cookies, analytics or third-party requests from the browser
+- Never log a visitor's IP address, X-Forwarded-For or User-Agent, even in error logs. web never forwards visitor headers to api; the search rate limiter keeps addresses in memory only (checked 2026-11-04)
 - PostgreSQL port bound to 127.0.0.1 only
 
 ## 05 Useful Commands
