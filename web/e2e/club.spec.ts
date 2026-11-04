@@ -19,7 +19,7 @@ test("search a club, Enter, then its page with standing and key players", async 
 test("a season tab switches the season", async ({ page }) => {
   await page.goto("/en/clubs/541-real-madrid");
   // The club page is heavy: let it finish loading so the click is handled by the client router.
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   await page.getByRole("navigation", { name: "Seasons" }).getByRole("link", { name: "2023-24" }).click();
   await expect(page).toHaveURL(/\/en\/clubs\/541-real-madrid\?season=2023$/);
   await expect(page.getByText("1st", { exact: true })).toBeVisible();
@@ -82,6 +82,7 @@ test("the club page only talks to our own server", async ({ page, baseURL }) => 
     if (!host.endsWith(".kaspersky-labs.com")) hosts.add(host);
   });
   await page.goto("/en/clubs/541-real-madrid");
-  await page.waitForLoadState("networkidle");
+  // Only images on screen: lazy ones below the fold load when scrolled to.
+  await page.waitForFunction(() => [...document.images].filter((i) => i.getBoundingClientRect().top < innerHeight).every((i) => i.complete));
   expect([...hosts]).toEqual([new URL(baseURL!).host]);
 });
