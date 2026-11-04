@@ -1,7 +1,7 @@
 # Todo — Spec 07 Production
 
 - [x] T1. CSP with nonce
-- [ ] T2. Redirects behind the proxy
+- [x] T2. Redirects behind the proxy
 - [ ] T3. Search rate limit (tests first)
 - [ ] T4. Legal notice link
 - [ ] T5. Production compose

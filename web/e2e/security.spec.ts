@@ -38,3 +38,23 @@ test("each page view gets a fresh nonce; no X-Powered-By", async ({ request }) =
   expect(a).not.toBe(b);
   expect((await request.get("/en")).headers()["x-powered-by"]).toBeUndefined();
 });
+
+test("redirects stay relative, so they keep https and the public host behind the proxy", async ({ request }) => {
+  const cases = {
+    "/": "/en",
+    "/en/players/278-x": "/en/players/278-kylian-mbappe",
+    "/en/players/278-x?season=2022": "/en/players/278-kylian-mbappe?season=2022",
+    "/en/clubs/541-x": "/en/clubs/541-real-madrid",
+    "/en/leaderboards": "/en/leaderboards/goals",
+    "/en/compare/278-x": "/en/compare/278-kylian-mbappe",
+    "/en/compare/278-x/1100-y?s1=2022": "/en/compare/278-kylian-mbappe/1100-erling-haaland?s1=2022",
+  };
+  for (const [from, to] of Object.entries(cases)) {
+    const res = await request.get(from, {
+      maxRedirects: 0,
+      headers: { "x-forwarded-proto": "https", "x-forwarded-host": "scorefoot.leonard-fontaine.com" },
+    });
+    expect(res.status(), from).toBeGreaterThanOrEqual(300);
+    expect(res.headers()["location"], from).toBe(to);
+  }
+});
