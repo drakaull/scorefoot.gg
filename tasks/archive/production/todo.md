@@ -6,4 +6,4 @@
 - [x] T4. Legal notice link
 - [x] T5. Production compose
 - [x] T6. No request logs
-- [ ] T7. Acceptance, docs, review, release ✋
+- [x] T7. Acceptance, docs, review, release ✋
