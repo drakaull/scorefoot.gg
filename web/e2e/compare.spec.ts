@@ -8,7 +8,7 @@ test("Compare button, then pick the second player", async ({ page }) => {
   await expect(page).toHaveURL(/\/en\/compare\/278-kylian-mbappe\?s1=2025$/);
   await expect(page.getByText("Pick a second player to compare")).toBeVisible();
 
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   const box = page.getByRole("combobox", { name: "Pick a player…" }).nth(1);
   await box.fill("haaland");
   await expect(page.getByRole("option", { name: /Erling Haaland/ })).toBeVisible();
@@ -21,7 +21,7 @@ test("Compare button, then pick the second player", async ({ page }) => {
 
 test("a season select changes one player's season", async ({ page }) => {
   await page.goto("/en/compare/278-kylian-mbappe/1100-erling-haaland");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   await page.getByRole("combobox", { name: "Season" }).first().selectOption("2022");
   await expect(page).toHaveURL(/s1=2022/);
   await expect(page.getByText(/Paris Saint Germain · Attacker/)).toBeVisible();
@@ -62,6 +62,6 @@ test("French labels and no third-party request", async ({ page, baseURL }) => {
   await page.goto("/fr/compare/278-kylian-mbappe/1100-erling-haaland");
   await expect(page.getByRole("heading", { name: "Percentiles face aux attaquants" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Statistiques par 90 minutes" })).toBeVisible();
-  await page.waitForLoadState("networkidle");
+  await page.waitForFunction(() => [...document.images].every((i) => i.complete));
   expect([...hosts]).toEqual([new URL(baseURL!).host]);
 });

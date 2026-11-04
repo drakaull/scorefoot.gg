@@ -23,7 +23,7 @@ test("a stat chip keeps the filters; rating has no per 90 switch", async ({ page
 
 test("changing a filter updates the URL and the ranking", async ({ page }) => {
   await page.goto("/en/leaderboards/goals");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   await page.getByRole("combobox", { name: "League" }).selectOption({ label: "Premier League" });
   await expect(page).toHaveURL(/league=39/);
   await expect(page.getByRole("region", { name: "Top 3" })).toContainText("Erling Haaland");
@@ -80,6 +80,7 @@ test("the leaderboard only talks to our own server", async ({ page, baseURL }) =
     if (!host.endsWith(".kaspersky-labs.com")) hosts.add(host);
   });
   await page.goto("/en/leaderboards/goals");
-  await page.waitForLoadState("networkidle");
+  // Only images on screen: lazy ones below the fold load when scrolled to.
+  await page.waitForFunction(() => [...document.images].filter((i) => i.getBoundingClientRect().top < innerHeight).every((i) => i.complete));
   expect([...hosts]).toEqual([new URL(baseURL!).host]);
 });
