@@ -1,0 +1,71 @@
+name: scorefoot
+
+services:
+  db:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # PostgreSQL 18+ images expect the volume on /var/lib/postgresql (data lives in a versioned subfolder)
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # Read-only JSON api + player and club images. Health is checked by the image's HEALTHCHECK.
+  api:
+    build:
+      context: ./server
+      dockerfile: ScoreFoot.Api/Dockerfile
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5080:8080"
+    volumes:
+      - images:/data/images:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # The website. The browser only talks to this service; it calls the api on the internal network.
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:8080
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # One-off job, not started by "docker compose up": docker compose run --rm sync run | status
+  sync:
+    build:
+      context: ./server
+      dockerfile: ScoreFoot.Sync/Dockerfile
+    profiles: ["tools"]
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      Sync__ImagesPath: /data/images
+    volumes:
+      - images:/data/images
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  images:

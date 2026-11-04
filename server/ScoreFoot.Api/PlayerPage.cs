@@ -1,0 +1,134 @@
+using Microsoft.EntityFrameworkCore;
+using ScoreFoot.Data;
+
+namespace ScoreFoot.Api;
+
+/// <param name="HasPage">False for clubs without a standing in the 5 leagues: shown as plain text.</param>
+public sealed record ClubRef(int Id, string Name, string? Logo, bool HasPage);
+public sealed record SeasonClub(int Id, string Name, string? Logo, string League, bool HasPage);
+public sealed record Summary(int Appearances, int Minutes, int Goals, int Assists, decimal? Rating);
+public sealed record Opponent(int Id, string Name, string? Code, string? Logo, bool HasPage);
+public sealed record FormMatch(int FixtureId, DateTimeOffset KickoffUtc, Opponent Opponent, bool Home,
+    int? GoalsFor, int? GoalsAgainst, int Minutes, decimal? Rating, int Goals, int Assists);
+public sealed record HistoryRow(int Season, ClubRef Club, string League, int Appearances, int Minutes, int Goals, int Assists, decimal? Rating);
+
+/// <summary>
+/// Everything the player page shows for one season. Only played lines (minutes > 0) count: the API also lists
+/// squad members who never played. Missing counts on a played line are 0; a missing rating is left out.
+/// </summary>
+public sealed record PlayerPage(
+    int Id, string Name, string? Photo, DateOnly? BirthDate, string? Nationality, int? HeightCm,
+    IReadOnlyList<int> Seasons, int Season, string? Position, IReadOnlyList<SeasonClub> Clubs,
+    Summary Summary, Summary? Previous, IReadOnlyList<FormMatch> Form, RadarResult Radar,
+    IReadOnlyList<StatGroup> Stats, IReadOnlyList<HistoryRow> History)
+{
+    public const int FormSize = 5;
+
+    /// <summary>The page for <paramref name="season"/> (latest played season when null), or null when there is none.</summary>
+    /// <param name="radarPosition">Rank on this position's axes and group instead of his own (comparator).</param>
+    public static async Task<PlayerPage?> LoadAsync(ScoreFootDbContext db, int id, int? season, CancellationToken ct = default,
+        string? radarPosition = null)
+    {
+        var player = await db.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
+        if (player is null) return null;
+        var lines = await db.PlayerSeasonStats.AsNoTracking()
+            .Where(s => s.PlayerId == id && s.Minutes > 0)
+            .Include(s => s.Team).Include(s => s.League)
+            .OrderByDescending(s => s.Season).ThenByDescending(s => s.Minutes)
+            .ToListAsync(ct);
+        if (lines.Count == 0) return null;
+
+        // Within a season, the club he played for last comes first (a January move puts the new club on top).
+        var lastMatch = await db.FixturePlayerStats.AsNoTracking()
+            .Where(s => s.PlayerId == id && s.Minutes > 0)
+            .GroupBy(s => new { s.Fixture.Season, s.TeamId })
+            .Select(g => new { g.Key.Season, g.Key.TeamId, Last = g.Max(s => s.Fixture.KickoffUtc) })
+            .ToDictionaryAsync(x => (x.Season, x.TeamId), x => x.Last, ct);
+        lines = lines.OrderByDescending(l => l.Season)
+            .ThenByDescending(l => lastMatch.GetValueOrDefault((l.Season, l.TeamId), DateTimeOffset.MinValue))
+            .ThenByDescending(l => l.Minutes)
+            .ToList();
+
+        var teamIds = lines.Select(l => l.TeamId).Distinct().ToList();
+
+        var withPage = await WithPageAsync(db, teamIds, ct);
+
+
+        var seasons = lines.Select(l => l.Season).Distinct().ToList();
+        var chosen = season ?? seasons[0];
+        var current = lines.Where(l => l.Season == chosen).ToList();
+        if (current.Count == 0) return null;
+        var previous = lines.Where(l => l.Season == chosen - 1).ToList();
+
+        var matches = await db.FixturePlayerStats.AsNoTracking()
+            .Where(s => s.PlayerId == id && s.Minutes > 0 && s.Fixture.Season == chosen)
+            .OrderByDescending(s => s.Fixture.KickoffUtc).Take(FormSize)
+            .Include(s => s.Fixture.HomeTeam).Include(s => s.Fixture.AwayTeam)
+            .ToListAsync(ct);
+        var opponentsWithPage = await WithPageAsync(db, matches.SelectMany(s => new[] { s.Fixture.HomeTeamId, s.Fixture.AwayTeamId }).Distinct().ToList(), ct);
+        var form = matches.Select(s =>
+        {
+            var f = s.Fixture;
+            var home = s.TeamId == f.HomeTeamId;
+            var opp = home ? f.AwayTeam : f.HomeTeam;
+            return new FormMatch(f.Id, f.KickoffUtc, new Opponent(opp.Id, opp.Name, opp.Code, Media(opp.LogoPath), opponentsWithPage.Contains(opp.Id)), home,
+                home ? f.HomeGoals : f.AwayGoals, home ? f.AwayGoals : f.HomeGoals,
+                s.Minutes ?? 0, s.Rating, s.Goals ?? 0, s.Assists ?? 0);
+        }).ToList();
+
+        var position = current.MaxBy(l => l.Minutes)!.Position;
+        var totals = SeasonTotals.From(current);
+        var radarPos = radarPosition ?? position;
+        var group = await RadarGroupAsync(db, chosen, radarPos, ct);
+        // Ranked against another position: join that group for the ranking, so percentiles stay within 0-100.
+        if (radarPos != position) group.Add(totals);
+        var radar = Api.Radar.Build(radarPos, totals, group);
+
+        return new PlayerPage(
+            player.Id, player.Name, Media(player.PhotoPath), player.BirthDate, player.Nationality, player.HeightCm,
+            seasons, chosen, position,
+            current.Select(l => new SeasonClub(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), l.League.Name, withPage.Contains(l.TeamId))).ToList(),
+            Summarize(totals), previous.Count > 0 ? Summarize(previous) : null, form, radar, StatGroups.Build(position, totals),
+            lines.Select(l => new HistoryRow(l.Season, new ClubRef(l.TeamId, l.Team.Name, Media(l.Team.LogoPath), withPage.Contains(l.TeamId)), l.League.Name,
+                l.Appearances ?? 0, l.Minutes ?? 0, l.Goals ?? 0, l.Assists ?? 0, l.Rating)).ToList());
+    }
+
+    /// <summary>
+    /// Season totals of every player whose main position (most minutes) is <paramref name="position"/> and who played
+    /// at least <see cref="Radar.MinMinutes"/> minutes. About 4,500 played lines per season, added up in memory.
+    /// </summary>
+    private static async Task<List<SeasonTotals>> RadarGroupAsync(ScoreFootDbContext db, int season, string? position, CancellationToken ct)
+    {
+        if (position is null) return [];
+        var lines = await db.PlayerSeasonStats.AsNoTracking().Where(s => s.Season == season && s.Minutes > 0).ToListAsync(ct);
+        return lines.GroupBy(l => l.PlayerId)
+            .Where(g => g.MaxBy(l => l.Minutes)!.Position == position && g.Sum(l => l.Minutes) >= Api.Radar.MinMinutes)
+            .Select(g => SeasonTotals.From(g.ToList()))
+            .ToList();
+    }
+
+    private static Summary Summarize(IReadOnlyList<PlayerSeasonStat> lines) => Summarize(SeasonTotals.From(lines));
+
+    private static Summary Summarize(SeasonTotals t) => new(t.Appearances, t.Minutes, t.Goals, t.Assists, t.Rating);
+
+    /// <summary>Ratings weighted by minutes, lines without a rating left out; null when no line has one.</summary>
+    internal static decimal? WeightedRating(IEnumerable<StatLine> lines)
+    {
+        var rated = lines.Where(l => l.Rating is not null && l.Minutes > 0).ToList();
+        return rated.Count == 0 ? null
+            : Math.Round(rated.Sum(l => l.Rating!.Value * l.Minutes!.Value) / rated.Sum(l => l.Minutes!.Value), 2);
+    }
+
+    /// <summary>Ids among <paramref name="teamIds"/> of clubs with a standing in the 5 leagues, the only ones with a page.</summary>
+
+    internal static async Task<HashSet<int>> WithPageAsync(ScoreFootDbContext db, List<int> teamIds, CancellationToken ct) =>
+
+        (await db.Standings.Where(s => teamIds.Contains(s.TeamId)).Select(s => s.TeamId).Distinct().ToListAsync(ct)).ToHashSet();
+
+
+    public static bool IsRadarPosition(string position) => Api.Radar.HasAxes(position);
+
+
+
+    internal static string? Media(string? path) => path is null ? null : "/media/" + path;
+}

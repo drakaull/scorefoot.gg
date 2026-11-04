@@ -1,0 +1,150 @@
+using Microsoft.EntityFrameworkCore;
+using ScoreFoot.Data;
+using ScoreFoot.Sync;
+
+namespace ScoreFoot.Tests;
+
+[Collection("db")]
+public class SyncRunnerTests
+{
+    private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+    /// <summary>Answers like API-Football for Ligue 1 2024, with only 2 player pages to keep the test short.</summary>
+    private static HttpResponseMessage FakeLigue1(Uri uri)
+    {
+        var path = uri.AbsolutePath.Trim('/');
+        var q = uri.Query;
+        return FakeApi.Json(path switch
+        {
+            "teams" => Samples.Read("teams-league61-2024.json"),
+            "standings" => Samples.Read("standings-league61-2024.json"),
+            "fixtures" when q.Contains("ids=") || q.Contains("id=") && !q.Contains("league=") => Samples.Read("fixtures-ids-batch.json"),
+            "fixtures" => Samples.Read("fixtures-league61-2024.json"),
+            "players" => Samples.WithPagingTotal(Samples.Read("players-league61-2024-p1.json"), 2),
+            _ => throw new InvalidOperationException(uri.ToString()),
+        });
+    }
+
+    [Fact]
+    public async Task Full_run_processes_every_task_once()
+    {
+        using var db = TestDb.CreateEmpty();
+        var api = new FakeApi(FakeLigue1);
+
+        Assert.Equal(RunResult.Completed, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
+
+        // teams + standings + fixtures + 2 player pages + 16 detail batches
+        Assert.Equal(21, api.Requests.Count);
+        Assert.True(db.SyncTasks.All(t => t.Status == SyncTaskStatus.Done));
+        Assert.Equal(21, db.RawResponses.Count());
+        Assert.Equal(21, db.ApiCalls.Count());
+
+        // A second run has nothing left to do and spends nothing.
+        Assert.Equal(RunResult.Completed, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
+        Assert.Equal(21, api.Requests.Count);
+    }
+
+    [Fact]
+    public async Task Stops_at_the_budget_and_resumes_later()
+    {
+        using var db = TestDb.CreateEmpty();
+        var api = new FakeApi(FakeLigue1);
+
+        Assert.Equal(RunResult.Stopped, await Build.Runner(db, api, Build.Options(budget: 3)).RunAsync(retryFailed: false, Ct));
+        Assert.Equal(3, api.Requests.Count);
+        Assert.Equal(3, db.SyncTasks.Count(t => t.Status == SyncTaskStatus.Done));
+
+        // Same day, same budget: still blocked, no request made.
+        Assert.Equal(RunResult.Stopped, await Build.Runner(db, api, Build.Options(budget: 3)).RunAsync(retryFailed: false, Ct));
+        Assert.Equal(3, api.Requests.Count);
+
+        // Bigger budget (e.g. next day): finishes without redoing the first tasks.
+        Assert.Equal(RunResult.Completed, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
+        Assert.Equal(21, api.Requests.Count);
+    }
+
+    [Fact]
+    public async Task Daily_limit_error_stops_and_keeps_the_task_pending()
+    {
+        using var db = TestDb.CreateEmpty();
+        var calls = 0;
+        var api = new FakeApi(uri => ++calls == 2 ? FakeApi.Json(Samples.DailyLimitError) : FakeLigue1(uri));
+
+        Assert.Equal(RunResult.Stopped, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
+        Assert.Equal(1, db.SyncTasks.Count(t => t.Status == SyncTaskStatus.Done));
+        Assert.Equal(0, db.SyncTasks.Count(t => t.Status == SyncTaskStatus.Failed));
+    }
+
+    [Fact]
+    public async Task Plan_error_fails_one_task_and_the_run_goes_on()
+    {
+        using var db = TestDb.CreateEmpty();
+        var api = new FakeApi(uri => uri.AbsolutePath.Contains("standings") ? FakeApi.Json(Samples.Read("error-plan-ids.json")) : FakeLigue1(uri));
+
+        Assert.Equal(RunResult.Completed, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
+        var failed = Assert.Single(db.SyncTasks.Where(t => t.Status == SyncTaskStatus.Failed));
+        Assert.Equal(SyncTaskType.Standings, failed.Type);
+        Assert.Contains("plan", failed.LastError);
+
+        // --retry-failed puts it back in the queue.
+        var fixedApi = new FakeApi(FakeLigue1);
+        await Build.Runner(db, fixedApi, Build.Options()).RunAsync(retryFailed: true, Ct);
+        Assert.True(db.SyncTasks.All(t => t.Status == SyncTaskStatus.Done));
+        Assert.Single(fixedApi.Requests);
+    }
+
+    [Fact]
+    public async Task Network_errors_are_retried()
+    {
+        using var db = TestDb.CreateEmpty();
+        var failures = 0;
+        var api = new FakeApi(uri => uri.AbsolutePath.Contains("teams") && failures++ < 2 ? throw new HttpRequestException("connection reset") : FakeLigue1(uri));
+
+        Assert.Equal(RunResult.Completed, await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct));
+        Assert.True(db.SyncTasks.All(t => t.Status == SyncTaskStatus.Done));
+    }
+
+    [Fact]
+    public async Task Reimport_rebuilds_rows_from_saved_answers_without_api_calls()
+    {
+        using var db = TestDb.CreateEmpty();
+        var api = new FakeApi(FakeLigue1);
+        await Build.Runner(db, api, Build.Options()).RunAsync(retryFailed: false, Ct);
+        await db.Players.Where(p => p.Id == 9).ExecuteUpdateAsync(u => u.SetProperty(p => p.Name, "broken"), Ct);
+        var (requests, tasks) = (api.Requests.Count, db.SyncTasks.Count());
+
+        await Build.Runner(db, api, Build.Options()).ReimportAsync(Ct);
+
+        db.ChangeTracker.Clear();
+        Assert.Equal("Achraf Hakimi", db.Players.Single(p => p.Id == 9).Name);
+        Assert.Equal((requests, tasks), (api.Requests.Count, db.SyncTasks.Count()));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Season_lines_copied_onto_a_later_club_are_removed(bool withFailedTask)
+    {
+        using var db = TestDb.CreateEmpty();
+        if (withFailedTask) db.SyncTasks.Add(new SyncTask { Type = SyncTaskType.FixtureDetails, LeagueId = 61, Season = 2022, Status = SyncTaskStatus.Failed });
+        db.Leagues.Add(new League { Id = 61, Name = "Ligue 1" });
+        db.Teams.AddRange(
+            new Team { Id = 1, Name = "Reims", NameSearch = "reims" },
+            new Team { Id = 2, Name = "Monaco", NameSearch = "monaco" });
+        db.Players.AddRange(
+            new Player { Id = 10, Name = "Folarin Balogun", NameSearch = "folarin balogun" },
+            new Player { Id = 11, Name = "No Match", NameSearch = "no match" });
+        db.Fixtures.Add(new Fixture { Id = 100, LeagueId = 61, Season = 2022, Round = "1", Status = "FT", HomeTeamId = 1, AwayTeamId = 2 });
+        db.FixturePlayerStats.Add(new FixturePlayerStat { FixtureId = 100, PlayerId = 10, TeamId = 1, Minutes = 90 });
+        db.PlayerSeasonStats.AddRange(
+            new PlayerSeasonStat { PlayerId = 10, TeamId = 1, LeagueId = 61, Season = 2022, Minutes = 3013, Goals = 21 }, // real club
+            new PlayerSeasonStat { PlayerId = 10, TeamId = 2, LeagueId = 61, Season = 2022, Minutes = 3010, Goals = 21 }, // copy
+            new PlayerSeasonStat { PlayerId = 11, TeamId = 2, LeagueId = 61, Season = 2022, Minutes = 500 });              // no match line: kept
+        await db.SaveChangesAsync(Ct);
+
+        // With a failed task the cleanup waits: the missing match lines could be the real club's.
+        Assert.Equal(withFailedTask ? 0 : 1, await Build.Runner(db, new FakeApi(FakeLigue1), Build.Options()).PruneTransferCopiesAsync(Ct));
+
+        Assert.Equal(withFailedTask ? [(10, 1), (10, 2), (11, 2)] : [(10, 1), (11, 2)],db.PlayerSeasonStats.OrderBy(s => s.PlayerId).Select(s => new { s.PlayerId, s.TeamId }).AsEnumerable().Select(s => (s.PlayerId, s.TeamId)));
+    }
+}
