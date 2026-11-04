@@ -4,6 +4,6 @@
 - [x] T2. Redirects behind the proxy
 - [x] T3. Search rate limit (tests first)
 - [x] T4. Legal notice link
-- [ ] T5. Production compose
+- [x] T5. Production compose
 - [ ] T6. No request logs
 - [ ] T7. Acceptance, docs, review, release ✋

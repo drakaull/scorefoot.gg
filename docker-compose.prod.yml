@@ -1,0 +1,31 @@
+# Production, on top of docker-compose.yml (spec 07). On the server the .env sets
+# COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml so a plain `docker compose` reads both files.
+# Needs Docker Compose 2.24 or newer (`!reset`). The portfolio's Caddy reaches web through the external network `edge`.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # Nothing is published on the host: only Caddy, on `edge`, reaches web.
+  db:
+    ports: !reset []
+    logging: *logging
+
+  api:
+    ports: !reset []
+    logging: *logging
+
+  web:
+    ports: !reset []
+    logging: *logging
+    networks:
+      default: {} # to reach api
+      edge:
+        aliases: [scorefoot-web]
+
+networks:
+  edge:
+    external: true
