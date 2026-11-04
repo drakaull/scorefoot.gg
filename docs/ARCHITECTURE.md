@@ -30,7 +30,7 @@ Major versions below; the exact patch version is pinned at install time and must
 | Charts     | Hand-written SVG (radar, form bars), no chart library |
 | Auth       | None in v1 |
 | Email      | None |
-| Hosting    | Not chosen. Everything runs with Docker Compose so it can move to any server |
+| Hosting    | Léonard's VPS (OVH, Ubuntu 24.04), behind the portfolio's Caddy; Docker Compose with `docker-compose.prod.yml` on top (spec 07) |
 | Testing    | xUnit (C#), Vitest (TS logic), Playwright (end-to-end, Chrome + Firefox) |
 | Runtime images | `node:24` (LTS) for web, `mcr.microsoft.com/dotnet/aspnet:10.0` for api, `postgres:18` |
 
@@ -105,6 +105,8 @@ ScoreFoot.gg/
 4. Images load from `web` `/media/...`, a route handler that streams them from `api` `/media/...`, never from a third-party domain.
 
 **Search:** the search bar calls `web` `/api/search` (a route handler), which calls `api` `GET /search?q=mbape`; PostgreSQL ranks players and clubs with trigram word similarity on unaccented names. The `api` address (`API_URL`) is read at runtime on the server and never reaches the browser.
+
+**Production (spec 07):** Caddy (portfolio, HTTPS) → `web` over the external Docker network `edge` (alias `scorefoot-web`); `api` and `db` stay on the project network and nothing is published on the host. Next.js sends a Content-Security-Policy with a per-request nonce, so every page is rendered per request. The search is rate limited in `web` (in memory, per visitor).
 
 ## 05 Data & Privacy
 - No visitor accounts, no visitor data stored, no cookies. Language is in the URL (`/en`, `/fr`).

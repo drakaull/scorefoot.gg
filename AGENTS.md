@@ -44,6 +44,7 @@ Project-specific rules for AI coding agents. They add to the owner's global work
 ## 05 Useful Commands
 ```
 docker compose up -d --build       # whole stack: db, api, web on http://localhost:3000
+docker compose -f docker-compose.yml -f docker-compose.prod.yml config   # production layout (on the server: COMPOSE_FILE in .env)
 docker compose up -d db            # start PostgreSQL only
 docker compose run --rm sync run   # download what is missing (stops at the daily budget), then images
 docker compose run --rm sync status   # progress, no API call

@@ -53,7 +53,11 @@ export default async function ComparePage({ params, searchParams }: Props) {
   ];
 
   // Wrong or missing names in the URL: send to the right ones, keeping the seasons.
-  if (players.some((p, i) => p && slots[i]?.slug !== `${p.id}-${slugify(p.name)}`)) permanentRedirect({ href: compareHref(picks), locale });
+  if (players.some((p, i) => p && slots[i]?.slug !== `${p.id}-${slugify(p.name)}`)) {
+    const href = compareHref(picks);
+    // A plain path when there is no season, or the Location would end with an empty "?".
+    permanentRedirect({ href: Object.keys(href.query).length ? href : href.pathname, locale });
+  }
 
   return (
     <div data-pending-scope className="flex flex-col gap-3 py-4 sm:gap-4 sm:py-6">
