@@ -58,3 +58,18 @@ test("redirects stay relative, so they keep https and the public host behind the
     expect(res.headers()["location"], from).toBe(to);
   }
 });
+
+test("search is rate limited per visitor, IPv6 grouped by /64", async ({ request }) => {
+  const burst = (ip: (i: number) => string) =>
+    Promise.all(Array.from({ length: 40 }, (_, i) => request.get("/api/search?q=mbap", { headers: { "x-forwarded-for": ip(i) } })));
+  // Addresses from the documentation ranges, unique to this test so other tests keep their own buckets.
+  const v4 = await burst(() => "198.51.100.42");
+  const refused = v4.filter((r) => r.status() === 429);
+  expect(refused.length).toBeGreaterThan(10);
+  expect(refused[0]?.headers()["retry-after"]).toBe("1");
+  expect(v4.find((r) => r.ok())?.headers()["cache-control"]).toBe("public, max-age=60");
+  expect((await request.get("/api/search?q=mbap", { headers: { "x-forwarded-for": "198.51.100.43" } })).status()).toBe(200);
+
+  const v6 = await burst((i) => `2001:db8:42:42::${(i + 1).toString(16)}`);
+  expect(v6.filter((r) => r.status() === 429).length).toBeGreaterThan(10);
+});

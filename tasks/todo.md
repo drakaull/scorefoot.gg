@@ -2,7 +2,7 @@
 
 - [x] T1. CSP with nonce
 - [x] T2. Redirects behind the proxy
-- [ ] T3. Search rate limit (tests first)
+- [x] T3. Search rate limit (tests first)
 - [ ] T4. Legal notice link
 - [ ] T5. Production compose
 - [ ] T6. No request logs
