@@ -6,4 +6,4 @@
 - [x] T4. Entry points and header
 - [x] T5. End-to-end tests
 - [x] T6. Visual check ✋
-- [ ] T7. Acceptance, docs, review ✋
+- [x] T7. Acceptance, docs, review ✋
