@@ -5,5 +5,5 @@
 - [x] T3. Search rate limit (tests first)
 - [x] T4. Legal notice link
 - [x] T5. Production compose
-- [ ] T6. No request logs
+- [x] T6. No request logs
 - [ ] T7. Acceptance, docs, review, release ✋

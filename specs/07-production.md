@@ -65,16 +65,16 @@ Make ScoreFoot ready to be served on https://scorefoot.leonard-fontaine.com from
 - Hand over to Léonard for the portfolio assistant: the headers Next.js sends, the minimum Docker Compose version, and the `/media` mapping (`/media/{leagues|teams|players}/{id}.png` → `{leagues|teams|players}/{id}.png` at the root of the `images` volume; numeric id only, anything else is a 404).
 
 ## Acceptance criteria
-- [ ] `docker compose config` (both files) shows no published port, `web` on `default` and `edge` with the alias `scorefoot-web`, logs capped at 3 × 10 MB.
-- [ ] Locally, with a test `edge` network: the stack starts with both files; a container on `edge` reaches `http://scorefoot-web:3000/en`; ports 3000, 5080 and 5432 are closed on the host.
-- [ ] Every page (home, player, club, leaderboards, compare, 404; `/en` and `/fr`) loads in Chrome and Firefox with **no CSP violation** in the console, and the response has the CSP header with a fresh nonce on each request.
-- [ ] No `X-Powered-By` header.
-- [ ] Every redirect has a relative `Location`; the compare redirect has no trailing `?`.
-- [ ] The 21st search request in the same second from one address gets a 429 with `Retry-After`; another address is not affected; two IPv6 addresses of the same /64 share a bucket.
-- [ ] Search answers carry `Cache-Control: public, max-age=60`.
-- [ ] `docker compose logs api web` holds no IP address after browsing.
-- [ ] The footer link goes to `https://leonard-fontaine.com/en/privacy` on `/en` and `/fr/privacy` on `/fr`.
-- [ ] All existing tests still pass.
+- [x] `docker compose config` (both files) shows no published port, `web` on `default` and `edge` with the alias `scorefoot-web`, logs capped at 3 × 10 MB.
+- [x] Locally, with a test `edge` network: the stack starts with both files; a container on `edge` reaches `http://scorefoot-web:3000/en`; ports 3000, 5080 and 5432 are closed on the host.
+- [x] Every page (home, player, club, leaderboards, compare, 404; `/en` and `/fr`) loads in Chrome and Firefox with **no CSP violation** in the console, and the response has the CSP header with a fresh nonce on each request.
+- [x] No `X-Powered-By` header.
+- [x] Every redirect has a relative `Location`; the compare redirect has no trailing `?`.
+- [x] The 21st search request in the same second from one address gets a 429 with `Retry-After`; another address is not affected; two IPv6 addresses of the same /64 share a bucket.
+- [x] Search answers carry `Cache-Control: public, max-age=60`.
+- [x] `docker compose logs api web` holds no IP address after browsing.
+- [x] The footer link goes to `https://leonard-fontaine.com/en/privacy` on `/en` and `/fr/privacy` on `/fr`.
+- [x] All existing tests still pass.
 
 ## Decisions (to approve)
 1. Rate limit in `web` rather than `api`: `web` is the only service reachable and gets the real address from Caddy directly.
