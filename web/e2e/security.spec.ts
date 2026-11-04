@@ -80,3 +80,12 @@ test("footer links to the portfolio legal notice in the page language", async ({
   await page.goto("/fr/leaderboards/goals");
   await expect(page.getByRole("link", { name: "Mentions légales et vie privée" })).toHaveAttribute("href", "https://leonard-fontaine.com/fr/privacy");
 });
+
+test("language alternate links use the public https address behind the proxy", async ({ request }) => {
+  const res = await request.get("/en/players/278-kylian-mbappe", {
+    headers: { "x-forwarded-proto": "https", "x-forwarded-host": "scorefoot.leonard-fontaine.com" },
+  });
+  const link = res.headers()["link"] ?? "";
+  expect(link).toContain("<https://scorefoot.leonard-fontaine.com/fr/players/278-kylian-mbappe>; rel=\"alternate\"; hreflang=\"fr\"");
+  expect(link).not.toMatch(/http:\/\/|:3000|scorefoot-web/);
+});
