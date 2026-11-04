@@ -73,3 +73,10 @@ test("search is rate limited per visitor, IPv6 grouped by /64", async ({ request
   const v6 = await burst((i) => `2001:db8:42:42::${(i + 1).toString(16)}`);
   expect(v6.filter((r) => r.status() === 429).length).toBeGreaterThan(10);
 });
+
+test("footer links to the portfolio legal notice in the page language", async ({ page }) => {
+  await page.goto("/en");
+  await expect(page.getByRole("link", { name: "Legal notice & privacy" })).toHaveAttribute("href", "https://leonard-fontaine.com/en/privacy");
+  await page.goto("/fr/leaderboards/goals");
+  await expect(page.getByRole("link", { name: "Mentions légales et vie privée" })).toHaveAttribute("href", "https://leonard-fontaine.com/fr/privacy");
+});

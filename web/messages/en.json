@@ -29,7 +29,8 @@
     "back": "Back to home"
   },
   "Footer": {
-    "data": "Data: API-Football. Player photos and club logos belong to their owners."
+    "data": "Data: API-Football. Player photos and club logos belong to their owners.",
+    "legal": "Legal notice & privacy"
   },
   "Position": {
     "Goalkeeper": "Goalkeeper",
